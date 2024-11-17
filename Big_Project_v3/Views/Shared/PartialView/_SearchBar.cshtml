@@ -1,10 +1,10 @@
-﻿@page
-@model Big_Project_v3.Views.Shared.PartialView._SearchBarModel
+﻿@model Big_Project_v3.Views.Shared.PartialView._SearchBarModel
 @{
 }
+<link href="./css/_SearchBar.css" rel="stylesheet">
 <body>
     <!-- 主內容容器 -->
-    <div class="w-100 container-fluid mt-5">
+    <div class="container-fluid mt-4 p-0">
         <!-- 搜尋區域的外框 -->
         <div class="row justify-content-center">
             <!-- 使用 Bootstrap 的 row 和 justify-content-center 將內容置於容器中間 -->
@@ -17,35 +17,69 @@
                 <!-- text-center: 將標題文字置中
                      mb-4: 下方外距為 4（相當於 1.5rem） -->
                 <!-- 搜尋表單區 -->
-                <form id="searchForm" onsubmit="searchRestaurants(event)" method="post" action="/SearchPage/SearchRestaurants" class="d-flex  align-items-center gap-3">
+                @* <form id="searchForm" onsubmit="searchRestaurants(event)" method="post" action="/SearchPage/SearchRestaurants" class="d-flex  align-items-center gap-3"> *@
+                <form class="search-bar">
                     <!-- d-flex: 使用 Flexbox 佈局
                          flex-column: 將內容垂直排列
                          align-items-center: 水平置中對齊
                          gap-3: 每個項目之間的間距為 3（相當於 1rem） -->
                     <!-- 日期選擇 -->
                     <div class="input-group">
-                        <!-- input-group: Bootstrap 組件，用於將多個輸入項目組合在一起 -->
                         <span class="input-group-text bg-secondary text-white">
-                            <!-- input-group-text: 添加圖標
-                                 bg-secondary: 背景為次要顏色
-                                 text-white: 文字顏色為白色 -->
-                            <i class="fa fa-calendar-alt"></i>
+                            <i class="fa fa-calendar-alt"></i> <!-- 日曆圖標 -->
                         </span>
-                        <input type="date" class="form-control">
-                        <!-- form-control: 設定輸入框的樣式，使其符合 Bootstrap 的預設樣式 -->
+                        <input type="date" class="form-control" id="dateInput" onchange="updateAvailableTimes()">
                     </div>
+
+                    <script>
+                        // 設置今天的日期為最小日期
+                        const today = new Date().toISOString().split("T")[0];
+                        document.getElementById("dateInput").setAttribute("min", today);
+                        // document.getElementById("dateInput").value = today;
+                        //讓網頁一開始，日期預設為今天
+                    </script>
 
                     <!-- 時間選擇 -->
                     <div class="input-group">
                         <span class="input-group-text bg-secondary text-white">
-                            <i class="fa fa-clock"></i>
+                            <i class="fa fa-clock"></i> <!-- 時鐘圖標 -->
                         </span>
-                        <select class="form-select">
-                            <!-- form-select: 設定下拉選單的樣式，使其符合 Bootstrap 的預設樣式 -->
-                            <option>下午8:00</option>
-                            <!-- 其他選項 -->
+                        <select class="form-select" id="timeSelect">
+                            <!-- JavaScript 會動態添加時間選項 -->
                         </select>
                     </div>
+
+                    <script>
+
+                        // updateAvailableTimes 函數：根據選擇的日期，向後端請求可用的時間選項
+                        function updateAvailableTimes() {
+                            // 取得用戶在日期選擇器中選擇的日期值
+                            const selectedDate = document.getElementById("dateInput").value;
+
+                            // 發送 AJAX 請求，將選擇的日期傳遞給後端的 GetAvailableTimes 方法
+                            fetch(`/SearchPage/GetAvailableTimes?selectedDate=${selectedDate}`)
+                                .then(response => response.json()) // 將回應轉換為 JSON 格式
+                                .then(times => {
+                                    // 取得時間選擇器的 DOM 元素
+                                    const timeSelect = document.getElementById("timeSelect");
+
+                                    // 清空時間選擇器中的現有選項
+                                    timeSelect.innerHTML = "";
+
+                                    // 遍歷後端返回的時間列表，並動態添加選項至時間選擇器
+                                    times.forEach(time => {
+                                        // 創建新的 <option> 元素
+                                        const option = document.createElement("option");
+                                        option.value = time; // 設定選項的值
+                                        option.textContent = time; // 設定選項的顯示文字
+                                        timeSelect.appendChild(option); // 將選項加入時間選擇器中
+                                    });
+                                });
+                        }
+
+                        // 初始化日期選擇器，設置今天為最早可選日期
+                        document.getElementById("dateInput").setAttribute("min", new Date().toISOString().split("T")[0]);
+                    </script>
 
                     <!-- 人數選擇 -->
                     <div class="input-group">
@@ -53,13 +87,15 @@
                             <i class="fa fa-user"></i>
                         </span>
                         <select class="form-select">
-                            <option>2位</option>
-                            <!-- 其他選項 -->
+                            @for (int i = 1; i <= 20; i++)
+                            {
+                                <option value="@($"{i}位")">@($"{i}位")</option>
+                            }
                         </select>
                     </div>
 
                     <!-- 關鍵字輸入框 -->
-                    <div class="input-group">
+                    <div class="w-100 w-sm-50 w-md-33 w-lg-25 input-group">
                         <span class="input-group-text bg-secondary text-white">
                             <i class="fa fa-search"></i>
                         </span>
@@ -72,22 +108,22 @@
 
                     <button id="searchButton" type="button" onclick="searchRestaurants()" class="btn btn-danger w-50">尋找餐廳</button>
 
-                    <button type="submit" class="btn btn-danger w-50">
-                        <!-- btn: 基本按鈕樣式
-                             btn-danger: 設定按鈕顏色為紅色
-                             w-50: 設定按鈕寬度為 50% -->
-                        尋找餐廳2
-                    </button>
+                    @*                     <button type="submit" class="btn btn-danger w-50">
+                    <!-- btn: 基本按鈕樣式
+                    btn-danger: 設定按鈕顏色為紅色
+                    w-50: 設定按鈕寬度為 50% -->
+                    尋找餐廳2
+                    </button> *@
                 </form>
-                   @* 搜尋按鈕的方法與邏輯 *@
-                    <script>
+                @* 搜尋按鈕的方法與邏輯 *@
+                <script>
                     function searchRestaurants() {
                         var keyword = document.getElementById("searchKeyword").value;
 
                         console.log("Search Keyword:", keyword); // 確認關鍵字是否正確
 
                         // 將參數附加到 URL 作為查询字符串
-                        axios.post(`/SearchPage/SearchRestaurants?keyword=${encodeURIComponent(keyword)}`)
+                        axios.get(`/SearchPage/SearchRestaurants?keyword=${encodeURIComponent(keyword)}`)
                             .then(function (response) {
                                 document.getElementById('searchResultsContainer').innerHTML = response.data;
                             })
@@ -95,7 +131,7 @@
                                 console.error("請求發生錯誤:", error);
                             });
                     }
-                    </script>
+                </script>
             </div>
             <!-- 排序按鈕區 -->
             <div class="container">
@@ -109,10 +145,11 @@
                     <!-- 中間的地點提示文字 -->
                     <div class="col-9 text-center">
                         <!--col 影響它的位置-->
-                        <p class="mb-0">您現在的地點在台中市嗎？ 
+                        <p class="mb-0">
+                            您現在的地點在台中市嗎？
                             <a href="#" class="text-danger">
-                            <i class="bi bi-geo-alt-fill"></i> 獲得現在地點
-                            </a>    
+                                <i class="bi bi-geo-alt-fill"></i> 獲得現在地點
+                            </a>
                         </p>
                     </div>
                 </div>

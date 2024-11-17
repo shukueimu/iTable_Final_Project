@@ -17,10 +17,30 @@ namespace Big_Project_v3.Controllers
         // 定義一個 Index 方法，返回視圖
         public IActionResult Index()
         {
-            return View(); // 返回對應的視圖，預設會尋找 Views/SearchPage/Index.cshtml
+            //var now = DateTime.Now;
+            //var availableTimes = new List<string>();
+
+            //// 將時間向上調整至下一個整點或半點
+            //if (now.Minute > 0 && now.Minute <= 30)
+            //{
+            //    now = now.AddMinutes(30 - now.Minute); // 調整至下一個半點
+            //}
+            //else if (now.Minute > 30)
+            //{
+            //    now = now.AddMinutes(60 - now.Minute); // 調整至下一個整點
+            //}
+
+            //// 從調整過的時間開始，生成當日每半小時的時間選項
+            //for (var time = now; time < now.Date.AddDays(1); time = time.AddMinutes(30))
+            //{
+            //    availableTimes.Add(time.ToString("tt h:mm")); // 12 小時制顯示格式，例如 "下午 12:00"
+            //}
+
+            //ViewBag.AvailableTimes = availableTimes; // 傳遞可用的時間選項至視圖
+            return View();
         }
 
-        [HttpPost] // 指定此方法只接受 POST 請求
+        [HttpGet] // 指定此方法只接受 POST 請求
         //[Route("SearchPage/SearchRestaurants")]
         public IActionResult SearchRestaurants(string keyword) // 定義搜尋餐廳的方法，接受關鍵字參數
         {
@@ -57,22 +77,54 @@ namespace Big_Project_v3.Controllers
             return PartialView("PartialView/_SearchRestaurant", viewModel); // 指定部分檢視路徑並提供資料
         }
 
-
-
-        public IActionResult CheckDatabaseConnection()
+        public IActionResult GetAvailableTimes(DateTime selectedDate)
         {
-            try
-            {
-                // 試著取得資料庫中任意一筆資料，確保資料庫連線正常
-                var isConnected = _context.Restaurants.Any();
-                return Content(isConnected ? "Connected to Database" : "No Data Found in Database");
-            }
-            catch (Exception ex)
-            {
-                // 如果出現例外情況，回傳例外的訊息
-                return Content($"Database connection failed: {ex.Message}");
-            }
-        }
+            // 取得當前的日期和時間
+            var now = DateTime.Now;
 
+            // 初始化一個字串列表，用於存放可用的時間選項
+            var availableTimes = new List<string>();
+
+            // 判斷選擇的日期是否為今天
+            if (selectedDate.Date == now.Date)
+            {
+                // 如果選擇的是今天，則生成從當前時間的下一個整點或半點開始的時間選項
+
+                // 如果當前分鐘數在 1 到 30 之間，將時間調整到下一個半點
+                if (now.Minute > 0 && now.Minute <= 30)
+                {
+                    now = now.AddMinutes(30 - now.Minute); // 調整至下一個半點
+                }
+                else if (now.Minute > 30)
+                {
+                    // 如果當前分鐘數大於 30，則將時間調整到下一個整點
+                    now = now.AddMinutes(60 - now.Minute); // 調整至下一個整點
+                }
+
+                // 從調整過的時間開始，每半小時生成一次時間選項，直到當日結束
+                for (var time = now; time < now.Date.AddDays(1); time = time.AddMinutes(30))
+                {
+                    // 將時間格式化為 12 小時制（上午/下午），並加入列表中
+                    availableTimes.Add(time.ToString("tt h:mm"));
+                }
+            }
+            else
+            {
+                // 如果選擇的是未來日期（非今天），則生成完整的 00:00 到 23:30 的時間選項
+
+                // 設定一天的起始時間為選擇日期的 00:00
+                var startOfDay = selectedDate.Date;
+
+                // 從 00:00 開始，每半小時生成一次時間選項，直到 23:30
+                for (var time = startOfDay; time < startOfDay.AddDays(1); time = time.AddMinutes(30))
+                {
+                    // 將時間格式化為 12 小時制（上午/下午），並加入列表中
+                    availableTimes.Add(time.ToString("tt h:mm"));
+                }
+            }
+
+            // 返回 JSON 格式的時間選項列表，供前端使用
+            return Json(availableTimes);
+        }
     }
 }
