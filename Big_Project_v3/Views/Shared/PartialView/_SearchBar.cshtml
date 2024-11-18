@@ -132,6 +132,52 @@
                             });
                     }
                 </script>
+
+                <script>
+                    //帶入預設時間
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const dateInput = document.getElementById('dateInput');
+                        const today = new Date();
+                        const year = today.getFullYear();
+                        const month = String(today.getMonth() + 1).padStart(2, '0');
+                        const day = String(today.getDate()).padStart(2, '0');
+                        dateInput.value = `${year}-${month}-${day}`;
+                        dateInput.setAttribute('min', `${year}-${month}-${day}`);
+
+                        updateAvailableTimes();
+
+                        dateInput.addEventListener('change', updateAvailableTimes);
+                    });
+
+                    function updateAvailableTimes() {
+                        const dateInput = document.getElementById('dateInput');
+                        const timeSelect = document.getElementById('timeSelect');
+                        const selectedDate = dateInput.value;
+
+                        fetch(`/SearchPage/GetAvailableTimes?selectedDate=${selectedDate}`)
+                            .then(response => response.json())
+                            .then(times => {
+                                timeSelect.innerHTML = "";
+                                const placeholderOption = document.createElement("option");
+                                placeholderOption.value = "";
+                                placeholderOption.textContent = "請選擇時間";
+                                timeSelect.appendChild(placeholderOption);
+
+                                times.forEach((time, index) => {
+                                    const option = document.createElement("option");
+                                    option.value = time;
+                                    option.textContent = time;
+                                    timeSelect.appendChild(option);
+
+                                    if (index === 0) {
+                                        timeSelect.selectedIndex = 1;
+                                    }
+                                });
+                            })
+                            .catch(error => console.error("無法載入可用時間選項:", error));
+                    }
+
+                </script>
             </div>
             <!-- 排序按鈕區 -->
             <div class="container">
