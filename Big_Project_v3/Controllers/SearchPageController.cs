@@ -127,5 +127,25 @@ namespace Big_Project_v3.Controllers
             return Json(availableTimes);
         }
 
+        [HttpGet]
+        public IActionResult SortByRating(string keyword)
+        {
+            // 基於關鍵字篩選資料，並按評分排序
+            var sortedRestaurants = _context.Restaurants
+                .Where(r => string.IsNullOrEmpty(keyword) || r.Name.Contains(keyword)) // 篩選條件
+                .OrderByDescending(r => r.AverageRating ?? 0) // 排序條件
+                .Select(r => new SearchRestaurantViewModel
+                {
+                    Id = r.RestaurantId,
+                    Name = r.Name,
+                    AverageRating = r.AverageRating ?? 0,
+                    Address = r.Address,
+                    Description = r.Description
+                })
+                .ToList();
+
+            return PartialView("PartialView/_SearchRestaurantFolder/_SearchRestaurantSorting", sortedRestaurants);
+        }
+
     }
 }

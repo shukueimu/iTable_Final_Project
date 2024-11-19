@@ -1,0 +1,33 @@
+﻿@model IEnumerable<Big_Project_v3.ViewModels.SearchRestaurantViewModel>
+<div id="" class="bg-white p-3 rounded">
+<div id="restaurant-list">
+    @foreach (var restaurant in Model)
+    {
+        <div class="restaurant-item d-flex mb-3">
+            <!-- d-flex: 使用 Flexbox 讓內容水平排列
+                 mb-3: 設定底部外距為 3（相當於 1rem） -->
+            <img src="~/img/輕井澤-封面.jpg" alt="Restaurant Image" class="img-thumbnail me-3" style="width: 120px; height: 80px;">
+            <!-- img-thumbnail: 添加圖片縮略圖邊框樣式
+                 me-3: 設定右側外距為 3（相當於 1rem）
+                 style: 手動設定圖片寬度和高度 -->
+
+            <div>
+                <h6 class="text-primary">@restaurant.Name</h6>
+                <!-- text-primary: 設定文字顏色為主要顏色 -->
+                @await Html.PartialAsync("PartialView/_SearchRestaurantFolder/StarRating_BootStrap", restaurant.AverageRating)
+                @restaurant.Description
+                <br />
+                @await Html.PartialAsync("PartialView/_SearchRestaurantFolder/StarRating_CSS", restaurant.AverageRating)
+                <br />
+                @restaurant.Description
+
+                <p>$$$ - @restaurant.Address</p>
+                <button class="btn btn-danger">下午7:00</button>
+                <!-- btn: 基本按鈕樣式
+                     btn-danger: 設定按鈕顏色為紅色 -->
+            </div>
+        </div>
+        <hr />
+    }
+</div>
+</div>

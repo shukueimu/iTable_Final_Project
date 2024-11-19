@@ -183,10 +183,32 @@
             <div class="container">
                 <div class="row align-items-center m-3">
                     <!-- 左側按鈕區域 -->
-                    <div class="col-auto">
-                        <button class="btn btn-outline-primary me-2">評分高低</button>
+                    <div id="restaurant-item" class="col-auto">
+                        <button class="btn btn-outline-primary me-2" onclick="sortByRating()">評分高低</button>
+
                         <button class="btn btn-outline-primary">距離遠近</button>
                     </div>
+                    <script>
+                        function sortByRating() {
+                            // 獲取使用者輸入的關鍵字
+                            const keyword = $('#searchKeyword').val();
+
+                            $.ajax({
+                                url: '/SearchPage/SortByRating',
+                                type: 'GET',
+                                data: { keyword: keyword }, // 傳遞關鍵字參數到後端
+                                success: function (data) {
+                                    // 更新容器內容
+                                    $('#searchResultsContainer').html(data);
+                                },
+                                error: function (err) {
+                                    console.error('排序失敗:', err);
+                                    alert('無法獲取資料，請稍後重試！');
+                                }
+                            });
+                        }
+
+                    </script>
 
                     <!-- 中間的地點提示文字 -->
                     <div class="col-9 text-center">
