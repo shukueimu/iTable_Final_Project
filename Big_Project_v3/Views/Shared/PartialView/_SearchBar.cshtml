@@ -125,13 +125,26 @@
                         // 將參數附加到 URL 作為查询字符串
                         axios.get(`/SearchPage/SearchRestaurants?keyword=${encodeURIComponent(keyword)}`)
                             .then(function (response) {
+                                // 更新餐廳搜尋結果
                                 document.getElementById('searchResultsContainer').innerHTML = response.data;
+
+                                // 重置篩選條件
+                                resetDistrictFilters();
                             })
                             .catch(function (error) {
                                 console.error("請求發生錯誤:", error);
                             });
                     }
+
+                    // 重置篩選條件的函數
+                    function resetDistrictFilters() {
+                        document.querySelectorAll('.form-check-input').forEach(function (checkbox) {
+                            checkbox.checked = false; // 將所有 checkbox 設置為未勾選
+                        });
+                        console.log("所有地區篩選條件已重置");
+                    }
                 </script>
+
 
                 <script>
                     //帶入預設時間
@@ -190,22 +203,37 @@
                     </div>
                     <script>
                         function sortByRating() {
-                            // 獲取使用者輸入的關鍵字
-                            const keyword = $('#searchKeyword').val();
-
-                            $.ajax({
-                                url: '/SearchPage/SortByRating',
-                                type: 'GET',
-                                data: { keyword: keyword }, // 傳遞關鍵字參數到後端
-                                success: function (data) {
-                                    // 更新容器內容
-                                    $('#searchResultsContainer').html(data);
-                                },
-                                error: function (err) {
-                                    console.error('排序失敗:', err);
-                                    alert('無法獲取資料，請稍後重試！');
-                                }
+                            const selectedDistricts = [];
+                            document.querySelectorAll('.form-check-input:checked').forEach((checkbox) => {
+                                selectedDistricts.push(checkbox.value); // 收集選中的地區名稱
                             });
+
+                            const keyword = document.getElementById('searchKeyword')?.value || ''; // 收集關鍵字
+
+                            fetch('/SearchPage/SortByRating', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    keyword: keyword,
+                                    selectedDistricts: selectedDistricts
+                                }) // 傳送關鍵字和地區
+                            })
+                                .then(response => {
+                                    if (!response.ok) {
+                                        throw new Error(`HTTP error! status: ${response.status}`);
+                                    }
+                                    return response.text(); // 接收部分視圖的 HTML
+                                })
+                                .then(html => {
+                                    const container = document.getElementById('searchResultsContainer');
+                                    container.innerHTML = html; // 更新篩選結果
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    document.getElementById('searchResultsContainer').innerHTML = '<p style="color: red;">排序失敗，請稍後再試。</p>';
+                                });
                         }
 
                     </script>
