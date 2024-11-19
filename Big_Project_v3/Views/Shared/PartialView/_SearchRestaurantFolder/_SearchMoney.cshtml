@@ -1,0 +1,26 @@
+﻿@model IEnumerable<Big_Project_v3.ViewModels.LocationViewModel>
+
+<div id="" class="bg-white p-3 rounded">
+        @foreach (var restaurant in Model)
+        {
+            <div class="restaurant-item d-flex mb-3">
+                <!-- 使用 Flexbox 讓內容水平排列 -->
+                <img src="~/img/輕井澤-封面.jpg" alt="Restaurant Image" class="img-thumbnail me-3" style="width: 120px; height: 80px;">
+                <div>
+                    <h6 class="text-primary">@restaurant.Name</h6>
+                    <!-- 星級 Bootstrap 樣式 -->
+                    @await Html.PartialAsync("PartialView/_SearchRestaurantFolder/StarRating_BootStrap", restaurant.AverageRating)
+                    <p>@restaurant.Description</p>
+                    <br />
+                    <!-- 星級 CSS 樣式 -->
+                    @await Html.PartialAsync("PartialView/_SearchRestaurantFolder/StarRating_CSS", restaurant.AverageRating)
+                    <br />
+                    <p>@restaurant.Description</p>
+                    <p>$$$ - @restaurant.Address</p>
+                    @* <p>距離: @restaurant.Distance.ToString("F2") 公里</p> *@
+                    <button class="btn btn-danger">下午7:00</button>
+                </div>
+            </div>
+            <hr />
+        }
+</div>

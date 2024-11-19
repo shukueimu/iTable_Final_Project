@@ -288,5 +288,46 @@ namespace Big_Project_v3.Controllers
         {
             return angle * Math.PI / 180;
         }
+
+        [HttpPost]
+        public IActionResult FilterRestaurantsByPrice([FromBody] PriceFilterViewModel filter)
+        {
+            // 根據價位條件篩選餐廳
+            var priceRange = filter.PriceRange;
+            var restaurants = _context.Restaurants
+                .AsEnumerable()
+                .Where(r =>
+                {
+                    // 提取 NT$ 價格並轉換為數字
+                    var priceString = r.PriceRange?.Replace("NT$", "").Replace(",", "").Trim();
+                    if (!int.TryParse(priceString, out int price)) return false;
+
+                    // 價位篩選條件
+                    return priceRange switch
+                    {
+                        "$" => price >= 0 && price <= 500,
+                        "$$" => price >= 501 && price <= 1000,
+                        "$$$" => price >= 1001 && price <= 1500,
+                        "$$$$" => price > 1500,
+                        _ => false,
+                    };
+                })
+                .Select(r => new LocationViewModel
+                {
+                    Id = r.RestaurantId,
+                    Name = r.Name,
+                    Address = r.Address,
+                    Description = r.Description,
+                    AverageRating = r.AverageRating ?? 0,
+                    Latitude = ExtractCoordinates(r.GoogleMapAddress).Latitude,
+                    Longitude = ExtractCoordinates(r.GoogleMapAddress).Longitude,
+                    SearchKeyword = priceRange, // 儲存篩選條件
+                })
+                .ToList();
+
+            // 返回篩選結果的部分視圖
+            return PartialView("~/Views/Shared/PartialView/_SearchRestaurantFolder/_SearchMoney.cshtml", restaurants);
+        }
+
     }
 }

@@ -51,17 +51,35 @@
     <div class="mb-4">
         <h6>價位</h6>
         <div class="btn-group" role="group" aria-label="Price Range">
-            <!-- btn-group: 建立按鈕組，使按鈕呈現一組連續排列的狀態
-                 role="group": 提供語意給輔助技術
-                 aria-label: 無障礙設置，為該組提供描述 -->
-            <button type="button" class="btn btn-outline-secondary">$</button>
-            <!-- btn: 基本按鈕樣式
-                 btn-outline-secondary: 淺色邊框按鈕 -->
-            <button type="button" class="btn btn-outline-secondary">$$</button>
-            <button type="button" class="btn btn-outline-secondary">$$$</button>
-            <button type="button" class="btn btn-outline-secondary">$$$$</button>
+            <!-- 篩選按鈕 -->
+            <button type="button" class="btn btn-outline-secondary" onclick="filterByPriceRange('$')">$</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="filterByPriceRange('$$')">$$</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="filterByPriceRange('$$$')">$$$</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="filterByPriceRange('$$$$')">$$$$</button>
         </div>
     </div>
+
+    <script>
+        // 發送篩選條件到後端
+        function filterByPriceRange(priceRange) {
+            fetch('/SearchPage/FilterRestaurantsByPrice', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ priceRange: priceRange }),
+            })
+                .then(response => response.text()) // 接收 HTML 結果
+                .then(html => {
+                    const container = document.getElementById('searchResultsContainer');
+                    container.innerHTML = html; // 插入返回的 HTML 結果
+                })
+                .catch(error => {
+                    console.error('篩選發生錯誤:', error);
+                    alert('篩選失敗，請稍後再試！');
+                });
+        }
+    </script>
 
         <!-- 地區選擇 -->
     <!-- 地區選擇 -->
