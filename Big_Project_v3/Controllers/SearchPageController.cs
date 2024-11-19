@@ -54,7 +54,7 @@ namespace Big_Project_v3.Controllers
             var results = string.IsNullOrWhiteSpace(keyword)
                 ? _context.Restaurants.ToList()
                 : _context.Restaurants
-                    .Where(r => r.Name.Contains(keyword))
+                    .Where(r => r.Name.Contains(keyword) || r.Address.Contains(keyword) || r.Description.Contains(keyword))
                     .ToList();
              
 
@@ -130,9 +130,9 @@ namespace Big_Project_v3.Controllers
         [HttpGet]
         public IActionResult SortByRating(string keyword)
         {
-            // 基於關鍵字篩選資料，並按評分排序
+            // 確保基於關鍵字篩選並排序
             var sortedRestaurants = _context.Restaurants
-                .Where(r => string.IsNullOrEmpty(keyword) || r.Name.Contains(keyword)) // 篩選條件
+                .Where(r => string.IsNullOrEmpty(keyword) || r.Name.Contains(keyword) || r.Address.Contains(keyword)) // 篩選條件
                 .OrderByDescending(r => r.AverageRating ?? 0) // 排序條件
                 .Select(r => new SearchRestaurantViewModel
                 {
@@ -143,6 +143,13 @@ namespace Big_Project_v3.Controllers
                     Description = r.Description
                 })
                 .ToList();
+
+            // 測試回傳數據
+            Console.WriteLine($"排序後的餐廳數量: {sortedRestaurants.Count}");
+            foreach (var restaurant in sortedRestaurants)
+            {
+                Console.WriteLine($"餐廳名稱: {restaurant.Name}, 地址: {restaurant.Address}, 評分: {restaurant.AverageRating}");
+            }
 
             return PartialView("PartialView/_SearchRestaurantFolder/_SearchRestaurantSorting", sortedRestaurants);
         }
