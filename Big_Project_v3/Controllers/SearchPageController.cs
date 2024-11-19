@@ -127,13 +127,15 @@ namespace Big_Project_v3.Controllers
             return Json(availableTimes);
         }
 
-        [HttpGet]
-        public IActionResult SortByRating(string keyword)
+        [HttpPost]
+        public IActionResult SortByRating([FromBody] SortRequest request)
         {
-            // 確保基於關鍵字篩選並排序
+            // 篩選條件：基於關鍵字和選中的地區
             var sortedRestaurants = _context.Restaurants
-                .Where(r => string.IsNullOrEmpty(keyword) || r.Name.Contains(keyword) || r.Address.Contains(keyword)) // 篩選條件
-                .OrderByDescending(r => r.AverageRating ?? 0) // 排序條件
+                .Where(r =>
+                    (string.IsNullOrEmpty(request.Keyword) || r.Name.Contains(request.Keyword) || r.Address.Contains(request.Keyword)) &&
+                    (request.SelectedDistricts == null || !request.SelectedDistricts.Any() || request.SelectedDistricts.Any(d => r.Address != null && r.Address.Contains(d))))
+                .OrderByDescending(r => r.AverageRating ?? 0) // 按評分排序
                 .Select(r => new SearchRestaurantViewModel
                 {
                     Id = r.RestaurantId,
@@ -153,6 +155,14 @@ namespace Big_Project_v3.Controllers
 
             return PartialView("PartialView/_SearchRestaurantFolder/_SearchRestaurantSorting", sortedRestaurants);
         }
+
+        // 定義請求的 DTO
+        public class SortRequest
+        {
+            public string Keyword { get; set; } // 關鍵字（可選）
+            public List<string> SelectedDistricts { get; set; } // 勾選的地區
+        }
+
 
         [HttpPost]
         public IActionResult FilterByDistrict([FromBody] List<string> selectedDistricts)

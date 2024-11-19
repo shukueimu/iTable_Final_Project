@@ -145,7 +145,6 @@
                     }
                 </script>
 
-
                 <script>
                     //帶入預設時間
                     document.addEventListener('DOMContentLoaded', function () {
@@ -243,11 +242,157 @@
                         <!--col 影響它的位置-->
                         <p class="mb-0">
                             您現在的地點在台中市嗎？
-                            <a href="#" class="text-danger">
+                            <a href="#" id="getLocation" class="text-danger">
                                 <i class="bi bi-geo-alt-fill"></i> 獲得現在地點
                             </a>
                         </p>
+                        <p id="locationSection"></p>
                     </div>
+
+                    <script>
+                        // 利用 Geolocation API，當使用者點擊按鈕時，請求位置資訊
+                        // 綁定按鈕與顯示結果的區域
+                        const getLocationBtn = document.getElementById("getLocation");
+                        const locationSection = document.getElementById("locationSection");
+
+                        // 台中市 29 區的經緯度範圍 (必須在 script 頂部定義)
+                        const TaichungDistricts = [
+                            { name: "中區", minLat: 24.1368, maxLat: 24.1445, minLng: 120.6760, maxLng: 120.6879 },
+                            { name: "東區", minLat: 24.1338, maxLat: 24.1595, minLng: 120.6830, maxLng: 120.7050 },
+                            { name: "南區", minLat: 24.1110, maxLat: 24.1330, minLng: 120.6490, maxLng: 120.6810 },
+                            { name: "西區", minLat: 24.1335, maxLat: 24.1512, minLng: 120.6475, maxLng: 120.6735 },
+                            { name: "北區", minLat: 24.1510, maxLat: 24.1725, minLng: 120.6605, maxLng: 120.6875 },
+                            { name: "西屯區", minLat: 24.1320, maxLat: 24.2060, minLng: 120.5820, maxLng: 120.6430 },
+                            { name: "北屯區", minLat: 24.1670, maxLat: 24.2190, minLng: 120.6530, maxLng: 120.7400 },
+                            { name: "南屯區", minLat: 24.1120, maxLat: 24.1605, minLng: 120.5940, maxLng: 120.6600 },
+                            { name: "太平區", minLat: 24.0990, maxLat: 24.1980, minLng: 120.7200, maxLng: 120.7600 },
+                            { name: "大里區", minLat: 24.1000, maxLat: 24.1400, minLng: 120.6800, maxLng: 120.7200 },
+                            { name: "霧峰區", minLat: 24.0350, maxLat: 24.1050, minLng: 120.6700, maxLng: 120.7300 },
+                            { name: "烏日區", minLat: 24.0900, maxLat: 24.1200, minLng: 120.6200, maxLng: 120.6700 },
+                            { name: "豐原區", minLat: 24.2500, maxLat: 24.2900, minLng: 120.6900, maxLng: 120.7600 },
+                            { name: "后里區", minLat: 24.2900, maxLat: 24.3500, minLng: 120.7100, maxLng: 120.7900 },
+                            { name: "石岡區", minLat: 24.2600, maxLat: 24.3000, minLng: 120.7900, maxLng: 120.8300 },
+                            { name: "東勢區", minLat: 24.2600, maxLat: 24.3500, minLng: 120.8200, maxLng: 120.9200 },
+                            { name: "和平區", minLat: 24.2200, maxLat: 24.5000, minLng: 120.9400, maxLng: 121.1600 },
+                            { name: "新社區", minLat: 24.1900, maxLat: 24.2700, minLng: 120.8200, maxLng: 120.9200 },
+                            { name: "潭子區", minLat: 24.2000, maxLat: 24.2500, minLng: 120.7000, maxLng: 120.7400 },
+                            { name: "大雅區", minLat: 24.2100, maxLat: 24.2600, minLng: 120.6400, maxLng: 120.7000 },
+                            { name: "神岡區", minLat: 24.2500, maxLat: 24.2900, minLng: 120.6700, maxLng: 120.7100 },
+                            { name: "大肚區", minLat: 24.1200, maxLat: 24.1800, minLng: 120.5200, maxLng: 120.6200 },
+                            { name: "沙鹿區", minLat: 24.2000, maxLat: 24.2600, minLng: 120.5300, maxLng: 120.6100 },
+                            { name: "龍井區", minLat: 24.1800, maxLat: 24.2200, minLng: 120.4800, maxLng: 120.5600 },
+                            { name: "梧棲區", minLat: 24.2500, maxLat: 24.2700, minLng: 120.5000, maxLng: 120.5700 },
+                            { name: "清水區", minLat: 24.2400, maxLat: 24.2800, minLng: 120.5200, maxLng: 120.5900 },
+                            { name: "大甲區", minLat: 24.3400, maxLat: 24.3800, minLng: 120.6100, maxLng: 120.6700 },
+                            { name: "外埔區", minLat: 24.3200, maxLat: 24.3500, minLng: 120.6400, maxLng: 120.7000 },
+                            { name: "大安區", minLat: 24.3600, maxLat: 24.4000, minLng: 120.5800, maxLng: 120.6400 },
+                        ];
+
+                        // 點擊按鈕事件
+                        getLocationBtn.addEventListener("click", (event) => {
+                            event.preventDefault(); // 防止 <a> 的預設跳轉
+
+                            // 確認瀏覽器是否支援 Geolocation API
+                            if (navigator.geolocation) {
+                                locationSection.innerHTML = "正在取得您的位置...";
+                                navigator.geolocation.getCurrentPosition(
+                                    (position) => {
+                                        const latitude = position.coords.latitude; // 使用者的緯度
+                                        const longitude = position.coords.longitude; // 使用者的經度
+
+                                        // 判斷行政區
+                                        const district = getDistrictFromCoordinates(latitude, longitude);
+
+                                        // 更新畫面內容
+                                        if (district) {
+                                            locationSection.innerHTML = `您目前的位置為：台中市${district}`;
+                                        } else {
+                                            locationSection.innerHTML = "您的位置不在台中市範圍內。";
+                                        }
+
+                                        // 將經緯度傳送到後端（可選）
+                                        sendLocationToServer(latitude, longitude);
+                                    },
+                                    (error) => {
+                                        // 處理錯誤
+                                        locationSection.innerHTML = "無法取得您的位置資訊，請檢查瀏覽器設定。";
+                                    }
+                                );
+                            } else {
+                                locationSection.innerHTML = "您的瀏覽器不支援地理定位功能。";
+                            }
+                        });
+
+                        // 判斷經緯度屬於哪個區域
+                        function getDistrictFromCoordinates(lat, lng) {
+                            for (const district of TaichungDistricts) {
+                                if (
+                                    lat >= district.minLat && // 符合最小緯度
+                                    lat <= district.maxLat && // 符合最大緯度
+                                    lng >= district.minLng && // 符合最小經度
+                                    lng <= district.maxLng    // 符合最大經度
+                                ) {
+                                    return district.name; // 返回區域名稱
+                                }
+                            }
+                            return null; // 找不到匹配的區域
+                        }
+
+                        // 傳送經緯度到後端（可選）
+                        function sendLocationToServer(lat, lng) {
+                            fetch('/SearchPage/SaveUserLocation', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ latitude: lat, longitude: lng }),
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    console.log('伺服器回應:', data);
+                                })
+                                .catch(error => {
+                                    console.error('錯誤:', error);
+                                });
+                        }
+
+                    </script>
+
+                    <script>
+                        // 台中市 29 區的經緯度範圍 (範例數據)
+                        const TaichungDistricts = [
+                            { name: "中區", minLat: 24.1368, maxLat: 24.1445, minLng: 120.6760, maxLng: 120.6879 },
+                            { name: "東區", minLat: 24.1338, maxLat: 24.1595, minLng: 120.6830, maxLng: 120.7050 },
+                            { name: "南區", minLat: 24.1110, maxLat: 24.1330, minLng: 120.6490, maxLng: 120.6810 },
+                            { name: "西區", minLat: 24.1335, maxLat: 24.1512, minLng: 120.6475, maxLng: 120.6735 },
+                            { name: "北區", minLat: 24.1510, maxLat: 24.1725, minLng: 120.6605, maxLng: 120.6875 },
+                            { name: "西屯區", minLat: 24.1320, maxLat: 24.2060, minLng: 120.5820, maxLng: 120.6430 },
+                            { name: "北屯區", minLat: 24.1670, maxLat: 24.2190, minLng: 120.6530, maxLng: 120.7400 },
+                            { name: "南屯區", minLat: 24.1120, maxLat: 24.1605, minLng: 120.5940, maxLng: 120.6600 },
+                            { name: "太平區", minLat: 24.0990, maxLat: 24.1980, minLng: 120.7200, maxLng: 120.7600 },
+                            { name: "大里區", minLat: 24.1000, maxLat: 24.1400, minLng: 120.6800, maxLng: 120.7200 },
+                            { name: "霧峰區", minLat: 24.0350, maxLat: 24.1050, minLng: 120.6700, maxLng: 120.7300 },
+                            { name: "烏日區", minLat: 24.0900, maxLat: 24.1200, minLng: 120.6200, maxLng: 120.6700 },
+                            { name: "豐原區", minLat: 24.2500, maxLat: 24.2900, minLng: 120.6900, maxLng: 120.7600 },
+                            { name: "后里區", minLat: 24.2900, maxLat: 24.3500, minLng: 120.7100, maxLng: 120.7900 },
+                            { name: "石岡區", minLat: 24.2600, maxLat: 24.3000, minLng: 120.7900, maxLng: 120.8300 },
+                            { name: "東勢區", minLat: 24.2600, maxLat: 24.3500, minLng: 120.8200, maxLng: 120.9200 },
+                            { name: "和平區", minLat: 24.2200, maxLat: 24.5000, minLng: 120.9400, maxLng: 121.1600 },
+                            { name: "新社區", minLat: 24.1900, maxLat: 24.2700, minLng: 120.8200, maxLng: 120.9200 },
+                            { name: "潭子區", minLat: 24.2000, maxLat: 24.2500, minLng: 120.7000, maxLng: 120.7400 },
+                            { name: "大雅區", minLat: 24.2100, maxLat: 24.2600, minLng: 120.6400, maxLng: 120.7000 },
+                            { name: "神岡區", minLat: 24.2500, maxLat: 24.2900, minLng: 120.6700, maxLng: 120.7100 },
+                            { name: "大肚區", minLat: 24.1200, maxLat: 24.1800, minLng: 120.5200, maxLng: 120.6200 },
+                            { name: "沙鹿區", minLat: 24.2000, maxLat: 24.2600, minLng: 120.5300, maxLng: 120.6100 },
+                            { name: "龍井區", minLat: 24.1800, maxLat: 24.2200, minLng: 120.4800, maxLng: 120.5600 },
+                            { name: "梧棲區", minLat: 24.2500, maxLat: 24.2700, minLng: 120.5000, maxLng: 120.5700 },
+                            { name: "清水區", minLat: 24.2400, maxLat: 24.2800, minLng: 120.5200, maxLng: 120.5900 },
+                            { name: "大甲區", minLat: 24.3400, maxLat: 24.3800, minLng: 120.6100, maxLng: 120.6700 },
+                            { name: "外埔區", minLat: 24.3200, maxLat: 24.3500, minLng: 120.6400, maxLng: 120.7000 },
+                            { name: "大安區", minLat: 24.3600, maxLat: 24.4000, minLng: 120.5800, maxLng: 120.6400 },
+                        ];
+
+                    </script>
                 </div>
             </div>
         </div>
