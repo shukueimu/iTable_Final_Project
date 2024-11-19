@@ -33,17 +33,17 @@ public partial class Review
     /// <summary>
     /// 評論日期（前台 + 後台）。此欄位記錄評論的發表日期，用於排序和顯示。
     /// </summary>
-    public DateTime? ReviewDate { get; set; }
+    public DateOnly? ReviewDate { get; set; }
 
     /// <summary>
     /// 評論建立時間（前台 + 後台）。此欄位記錄評論紀錄的建立時間，用於審計和管理。
     /// </summary>
-    public DateTime CreatedAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
 
     /// <summary>
     /// 評論更新時間（前台 + 後台）。此欄位記錄評論紀錄的最後更新時間，用於追蹤資料變更歷史。
     /// </summary>
-    public DateTime UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     public virtual Restaurant? Restaurant { get; set; }
 

@@ -56,11 +56,11 @@ namespace Big_Project_v3.Controllers
                 : _context.Restaurants
                     .Where(r => r.Name.Contains(keyword) || r.Address.Contains(keyword) || r.Description.Contains(keyword))
                     .ToList();
-             
+
 
             //----------測試回傳數據----------
             Console.WriteLine("搜尋結果數量: " + results.Count);
-            foreach (   var restaurant in results)
+            foreach (var restaurant in results)
             {
                 Console.WriteLine("符合條件的餐廳名稱: " + restaurant.Name);
             }
@@ -204,6 +204,89 @@ namespace Big_Project_v3.Controllers
 
             // 返回篩選結果，渲染為部分視圖
             return PartialView("PartialView/_SearchRestaurantFolder/_SearchDistrict", filteredRestaurants);
+        }
+
+        [HttpPost]
+        public IActionResult SortRestaurantsByLocation([FromBody] LocationViewModel userLocation)
+        {
+            double userLat = userLocation.Latitude;
+            double userLng = userLocation.Longitude;
+            bool sortByDistance = userLocation.SortByDistance;
+
+            // 查詢餐廳並按距離或名稱排序
+            var restaurants = _context.Restaurants
+                .AsEnumerable()
+                .Select(r => new LocationViewModel
+                {
+                    Id = r.RestaurantId,
+                    Name = r.Name,
+                    Address = r.Address,
+                    Description = r.Description,
+                    AverageRating = r.AverageRating ?? 0,
+                    Latitude = ExtractCoordinates(r.GoogleMapAddress).Latitude,
+                    Longitude = ExtractCoordinates(r.GoogleMapAddress).Longitude,
+                })
+                .ToList();
+
+            // 按距離或名稱排序
+            if (sortByDistance)
+            {
+                // 按距離排序
+                restaurants = restaurants
+                    .OrderBy(r => CalculateDistance(userLat, userLng, r.Latitude, r.Longitude))
+                    .ToList();
+            }
+            else
+            {
+                // 按名稱排序
+                restaurants = restaurants
+                    .OrderBy(r => r.Name)
+                    .ToList();
+            }
+
+            // 返回部分視圖
+            return PartialView("~/Views/Shared/PartialView/_SearchRestaurantFolder/_SearchDistance.cshtml", restaurants);
+        }
+
+
+        // 私有方法：提取經緯度
+        private (double Latitude, double Longitude) ExtractCoordinates(string googleMapAddress)
+        {
+            if (string.IsNullOrEmpty(googleMapAddress) || !googleMapAddress.Contains("@"))
+                return (0, 0); // 返回默認值
+
+            var coordinatePart = googleMapAddress.Split('@')[1].Split(','); // 按 ',' 分割經緯度
+            if (coordinatePart.Length < 2)
+                return (0, 0); // 返回默認值
+
+            if (double.TryParse(coordinatePart[0], out double latitude) &&
+                double.TryParse(coordinatePart[1], out double longitude))
+            {
+                return (latitude, longitude);
+            }
+
+            return (0, 0); // 解析失敗，返回默認值
+        }
+
+        // 私有方法：計算距離
+        private double CalculateDistance(double lat1, double lng1, double lat2, double lng2)
+        {
+            const double EarthRadius = 6371; // 地球半徑（公里）
+            double dLat = ToRadians(lat2 - lat1);
+            double dLng = ToRadians(lng2 - lng1);
+
+            double a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                       Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2)) *
+                       Math.Sin(dLng / 2) * Math.Sin(dLng / 2);
+
+            double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+            return EarthRadius * c; // 返回距離
+        }
+
+        // 私有方法：角度轉弧度
+        private double ToRadians(double angle)
+        {
+            return angle * Math.PI / 180;
         }
     }
 }

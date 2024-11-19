@@ -18,7 +18,7 @@ public partial class User
     /// <summary>
     /// 密碼的哈希值
     /// </summary>
-    public string PasswordHash { get; set; } = null!;
+    public string? PasswordHash { get; set; }
 
     /// <summary>
     /// 使用者姓名
@@ -38,12 +38,12 @@ public partial class User
     /// <summary>
     /// 帳號建立時間
     /// </summary>
-    public DateTime CreatedAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
 
     /// <summary>
     /// 帳號更新時間
     /// </summary>
-    public DateTime UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     public virtual ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
 

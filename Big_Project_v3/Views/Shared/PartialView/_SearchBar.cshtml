@@ -198,7 +198,8 @@
                     <div id="restaurant-item" class="col-auto">
                         <button class="btn btn-outline-primary me-2" onclick="sortByRating()">評分高低</button>
 
-                        <button class="btn btn-outline-primary">距離遠近</button>
+                        @* <button class="btn btn-outline-primary" onclick="sortByDistance()">距離遠近</button> *@
+                        <button id="sortByDistanceButton" class="btn btn-outline-primary">距離遠近</button>
                     </div>
                     <script>
                         function sortByRating() {
@@ -359,40 +360,66 @@
                     </script>
 
                     <script>
-                        // 台中市 29 區的經緯度範圍 (範例數據)
-                        const TaichungDistricts = [
-                            { name: "中區", minLat: 24.1368, maxLat: 24.1445, minLng: 120.6760, maxLng: 120.6879 },
-                            { name: "東區", minLat: 24.1338, maxLat: 24.1595, minLng: 120.6830, maxLng: 120.7050 },
-                            { name: "南區", minLat: 24.1110, maxLat: 24.1330, minLng: 120.6490, maxLng: 120.6810 },
-                            { name: "西區", minLat: 24.1335, maxLat: 24.1512, minLng: 120.6475, maxLng: 120.6735 },
-                            { name: "北區", minLat: 24.1510, maxLat: 24.1725, minLng: 120.6605, maxLng: 120.6875 },
-                            { name: "西屯區", minLat: 24.1320, maxLat: 24.2060, minLng: 120.5820, maxLng: 120.6430 },
-                            { name: "北屯區", minLat: 24.1670, maxLat: 24.2190, minLng: 120.6530, maxLng: 120.7400 },
-                            { name: "南屯區", minLat: 24.1120, maxLat: 24.1605, minLng: 120.5940, maxLng: 120.6600 },
-                            { name: "太平區", minLat: 24.0990, maxLat: 24.1980, minLng: 120.7200, maxLng: 120.7600 },
-                            { name: "大里區", minLat: 24.1000, maxLat: 24.1400, minLng: 120.6800, maxLng: 120.7200 },
-                            { name: "霧峰區", minLat: 24.0350, maxLat: 24.1050, minLng: 120.6700, maxLng: 120.7300 },
-                            { name: "烏日區", minLat: 24.0900, maxLat: 24.1200, minLng: 120.6200, maxLng: 120.6700 },
-                            { name: "豐原區", minLat: 24.2500, maxLat: 24.2900, minLng: 120.6900, maxLng: 120.7600 },
-                            { name: "后里區", minLat: 24.2900, maxLat: 24.3500, minLng: 120.7100, maxLng: 120.7900 },
-                            { name: "石岡區", minLat: 24.2600, maxLat: 24.3000, minLng: 120.7900, maxLng: 120.8300 },
-                            { name: "東勢區", minLat: 24.2600, maxLat: 24.3500, minLng: 120.8200, maxLng: 120.9200 },
-                            { name: "和平區", minLat: 24.2200, maxLat: 24.5000, minLng: 120.9400, maxLng: 121.1600 },
-                            { name: "新社區", minLat: 24.1900, maxLat: 24.2700, minLng: 120.8200, maxLng: 120.9200 },
-                            { name: "潭子區", minLat: 24.2000, maxLat: 24.2500, minLng: 120.7000, maxLng: 120.7400 },
-                            { name: "大雅區", minLat: 24.2100, maxLat: 24.2600, minLng: 120.6400, maxLng: 120.7000 },
-                            { name: "神岡區", minLat: 24.2500, maxLat: 24.2900, minLng: 120.6700, maxLng: 120.7100 },
-                            { name: "大肚區", minLat: 24.1200, maxLat: 24.1800, minLng: 120.5200, maxLng: 120.6200 },
-                            { name: "沙鹿區", minLat: 24.2000, maxLat: 24.2600, minLng: 120.5300, maxLng: 120.6100 },
-                            { name: "龍井區", minLat: 24.1800, maxLat: 24.2200, minLng: 120.4800, maxLng: 120.5600 },
-                            { name: "梧棲區", minLat: 24.2500, maxLat: 24.2700, minLng: 120.5000, maxLng: 120.5700 },
-                            { name: "清水區", minLat: 24.2400, maxLat: 24.2800, minLng: 120.5200, maxLng: 120.5900 },
-                            { name: "大甲區", minLat: 24.3400, maxLat: 24.3800, minLng: 120.6100, maxLng: 120.6700 },
-                            { name: "外埔區", minLat: 24.3200, maxLat: 24.3500, minLng: 120.6400, maxLng: 120.7000 },
-                            { name: "大安區", minLat: 24.3600, maxLat: 24.4000, minLng: 120.5800, maxLng: 120.6400 },
-                        ];
+                        // 通用函數：獲取經緯度並發送請求
+                        function fetchRestaurantsByLocation(isSortingByDistance) {
+                            // 使用地理位置 API 獲取使用者當前的經緯度
+                            navigator.geolocation.getCurrentPosition(
+                                (position) => {
+                                    const latitude = position.coords.latitude; // 使用者緯度
+                                    const longitude = position.coords.longitude; // 使用者經度
 
+                                    // 傳遞經緯度到後端
+                                    fetch('/SearchPage/SortRestaurantsByLocation', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json', // 指定 JSON 格式
+                                        },
+                                        body: JSON.stringify({
+                                            latitude: latitude,
+                                            longitude: longitude,
+                                            sortByDistance: isSortingByDistance, // 傳遞排序參數
+                                        }),
+                                    })
+                                        .then(response => response.text()) // 使用 text() 接收 HTML
+                                        .then(html => {
+                                            // 確保顯示區域存在
+                                            const container = document.getElementById('searchResultsContainer');
+                                            if (!container) {
+                                                console.error('無法找到顯示餐廳列表的容器，請檢查 HTML 結構。');
+                                                return;
+                                            }
+
+                                            // 插入返回的 HTML 到容器中
+                                            container.innerHTML = html;
+                                        })
+                                        .catch(error => {
+                                            console.error('發生錯誤:', error);
+                                            alert('無法獲取餐廳列表，請稍後再試！');
+                                        });
+                                },
+                                (error) => {
+                                    console.error('地理位置獲取失敗:', error);
+                                    alert("無法獲取您的位置，請檢查瀏覽器的定位設置！");
+                                }
+                            );
+                        }
+
+                        // 初始化：頁面載入時加載餐廳列表（預設按評分排序）
+                        document.addEventListener('DOMContentLoaded', () => {
+                            fetchRestaurantsByLocation(false); // 預設不按距離排序
+                        });
+
+                        // 綁定按鈕事件：按距離排序
+                        const sortByDistanceButton = document.getElementById('sortByDistanceButton');
+                        if (sortByDistanceButton) {
+                            sortByDistanceButton.addEventListener('click', () => {
+                                fetchRestaurantsByLocation(true); // 按距離排序
+                            });
+                        } else {
+                            console.error('無法找到按鈕，請檢查 HTML 結構。');
+                        }
                     </script>
+
                 </div>
             </div>
         </div>

@@ -23,7 +23,7 @@ public partial class RestaurantUser
     /// <summary>
     /// 密碼的哈希值（前台 + 後台）。此欄位存儲餐廳管理者密碼的加密哈希值，確保密碼的安全性。
     /// </summary>
-    public string PasswordHash { get; set; } = null!;
+    public string? PasswordHash { get; set; }
 
     /// <summary>
     /// 手機號碼（前台 + 後台）。此欄位存儲餐廳管理者的手機號碼，用於緊急聯絡和通知。
@@ -43,12 +43,12 @@ public partial class RestaurantUser
     /// <summary>
     /// 帳號建立時間（前台 + 後台）。此欄位記錄餐廳管理者帳號的建立時間，用於審計和管理。
     /// </summary>
-    public DateTime CreatedAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
 
     /// <summary>
     /// 帳號更新時間（前台 + 後台）。此欄位記錄餐廳管理者帳號的最後更新時間，用於追蹤帳號變更歷史。
     /// </summary>
-    public DateTime UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     public virtual ICollection<PasswordResetRequest> PasswordResetRequests { get; set; } = new List<PasswordResetRequest>();
 

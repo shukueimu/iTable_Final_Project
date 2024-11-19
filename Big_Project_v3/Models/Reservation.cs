@@ -68,12 +68,12 @@ public partial class Reservation
     /// <summary>
     /// 訂位建立時間（前台 + 後台）。此欄位記錄訂位紀錄的建立時間，用於審計和管理。
     /// </summary>
-    public DateTime CreatedAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
 
     /// <summary>
     /// 訂位更新時間（前台 + 後台）。此欄位記錄訂位紀錄的最後更新時間，用於追蹤資料變更歷史。
     /// </summary>
-    public DateTime UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     public virtual Restaurant? Restaurant { get; set; }
 

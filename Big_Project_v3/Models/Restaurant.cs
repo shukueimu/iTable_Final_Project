@@ -1,4 +1,4 @@
-﻿        using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Big_Project_v3.Models;
@@ -48,27 +48,31 @@ public partial class Restaurant
     /// <summary>
     /// 餐廳資料建立時間（前台 + 後台）。此欄位記錄餐廳資料的建立時間，用於審計和管理。
     /// </summary>
-    public DateTime CreatedAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
 
     /// <summary>
     /// 餐廳資料更新時間（前台 + 後台）。此欄位記錄餐廳資料的最後更新時間，用於追蹤資料變更歷史。
     /// </summary>
-    public DateTime UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     /// <summary>
     /// 營業開始時間
     /// </summary>
-    public TimeOnly BusinessHoursStart { get; set; }
+    public TimeOnly? BusinessHoursStart { get; set; }
 
     /// <summary>
     /// 營業結束時間
     /// </summary>
-    public TimeOnly BusinessHoursEnd { get; set; }
+    public TimeOnly? BusinessHoursEnd { get; set; }
 
     /// <summary>
     /// 最後收客時間（可為空）
     /// </summary>
     public TimeOnly? LastCheckInTime { get; set; }
+
+    public string? GoogleMapAddress { get; set; }
+
+    public string? PriceRange { get; set; }
 
     public virtual ICollection<Announcement> Announcements { get; set; } = new List<Announcement>();
 
