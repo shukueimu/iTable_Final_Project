@@ -196,9 +196,9 @@
                             $.ajax({
                                 url: '/SearchPage/SortByRating',
                                 type: 'GET',
-                                data: { keyword: keyword }, // 傳遞關鍵字到後端
+                                data: { keyword: keyword }, // 傳遞關鍵字參數到後端
                                 success: function (data) {
-                                    // 更新餐廳區塊的內容
+                                    // 更新容器內容
                                     $('#searchResultsContainer').html(data);
                                 },
                                 error: function (err) {
