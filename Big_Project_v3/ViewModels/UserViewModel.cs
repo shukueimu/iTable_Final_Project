@@ -40,5 +40,8 @@
         public int Rating { get; set; }
         public string ReviewText { get; set; }
         public string ReviewDate { get; set; }
+
+        // 新增屬性：用戶的訂位記錄
+        public IEnumerable<ReservationViewModel> Reservations { get; set; }
     }
 }

@@ -1,4 +1,6 @@
 ﻿@* @model Big_Project_v3.ViewModels.UserViewModel *@
+@model Big_Project_v3.ViewModels.UserViewModel
+
 @{
     ViewData["Title"] = "會員中心";
 }
@@ -38,10 +40,18 @@
         <!-- Main Content 區塊 -->
         <div class="col-md-9">
             <div id="mainContent">
-                @await Html.PartialAsync("PartialView/_MemberFolder/_Reservation")
+
+                @if (Model.Reservations != null && Model.Reservations.Any())
+                {
+                    <!-- 如果有訂位記錄，渲染 _Reservation 部分視圖 -->
+                    @await Html.PartialAsync("PartialView/_MemberFolder/_Reservation", Model.Reservations)
+                }
+                else
+                {
+                    <!-- 如果沒有訂位記錄，顯示 _SearchBar 部分視圖 -->
+                    @await Html.PartialAsync("PartialView/_SearchBar")
+                }
             </div>
-        </div>
-    </div>
 
     <script>
         function loadPartialView(viewName) {

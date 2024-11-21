@@ -1,2 +1,34 @@
-﻿<h4>你的近期訂位</h4>
-<p>目前沒有訂位記錄。</p>
+﻿@model IEnumerable<Big_Project_v3.ViewModels.ReservationViewModel>
+
+<div class="container mt-4">
+    <h4>近期訂位</h4>
+    <div class="row">
+        @foreach (var reservation in Model)
+        {
+            <div class="col-md-12 mb-3">
+                <!-- 卡片樣式 -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <!-- 餐廳圖片 -->
+                        <div class="row">
+                            <div class="col-md-3">
+                                <img src="https://via.placeholder.com/150" alt="餐廳圖片" class="img-fluid rounded">
+                            </div>
+                            <div class="col-md-9">
+                                <!-- 訂位資訊 -->
+                                <h5 class="card-title">@reservation.Name</h5>
+                                <p class="text-success fw-bold">✔ 已確認訂位</p>
+                                <p class="mb-1">
+                                    <i class="bi bi-people"></i> 成人人數：@reservation.NumAdults<br />
+                                    <i class="bi bi-person"></i> 兒童人數：@reservation.NumChildren<br />
+                                    <i class="bi bi-calendar-event"></i> 日期：@reservation.ReservationDate.ToString("yyyy/MM/dd")<br />
+                                    <i class="bi bi-clock"></i> 時間：@reservation.ReservationTime.ToString(@"hh\:mm")
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
