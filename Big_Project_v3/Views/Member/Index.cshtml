@@ -1,0 +1,67 @@
+﻿@* @model Big_Project_v3.ViewModels.UserViewModel *@
+@{
+    ViewData["Title"] = "會員中心";
+}
+
+<link rel="stylesheet" href="~/css/Index.css" />
+
+<div class="container">
+    <!-- Header 區塊 -->
+    <br />
+    <div class="row mt-4" style="margin-top:0px !important">
+        <div class="col-12 text-center border-bottom pb-3">
+            <h3>@Model.UserName（@Model.Name） 您好：</h3>
+            @* <p>會員起始日期：2024年11月</p> *@
+        </div>
+    </div>
+
+    <!-- 左側 Sidebar 和內容 -->
+    <div class="row mt-4">
+        <!-- Sidebar 區塊 -->
+        <div class="col-md-3">
+            <ul class="list-group">
+                <li class="fw-bold fs-5 list-group-item">
+                    <a href="#" onclick="loadPartialView('_Reservation')">訂位</a>
+                </li>
+                <li class="fw-bold fs-5 list-group-item">
+                    <a href="#" onclick="loadPartialView('_FavoriteRestaurants')">珍藏餐廳</a>
+                </li>
+                <li class="fw-bold fs-5 list-group-item">
+                    <a href="#" onclick="loadPartialView('_Comment')">評論</a>
+                </li>
+                <li class="fw-bold fs-5 list-group-item">
+                       <a href="/User/EditProfile">帳戶詳細資料</a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content 區塊 -->
+        <div class="col-md-9">
+            <div id="mainContent">
+                @await Html.PartialAsync("PartialView/_MemberFolder/_Reservation")
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function loadPartialView(viewName) {
+            // 發送 AJAX 請求到 Controller 的 LoadPartialView 方法
+            fetch(`/Member/LoadPartialView?partialViewName=${viewName}`)
+                .then(response => {
+                    // 確保伺服器回應是成功的
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text(); // 獲取回傳的 HTML
+                })
+                .then(html => {
+                    // 將回傳的 HTML 更新到 id="mainContent" 的區塊
+                    document.getElementById('mainContent').innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error loading partial view:', error);
+                });
+        }
+    </script>
+
+</div>

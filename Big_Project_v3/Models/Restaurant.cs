@@ -38,7 +38,7 @@ public partial class Restaurant
     /// <summary>
     /// 是否開放預訂（1：開放，0：關閉）（前台 + 後台）。此欄位指示餐廳是否接受預訂，供客戶決定是否進行預約。
     /// </summary>
-    public bool? IsReservationOpen { get; set; }
+    public bool IsReservationOpen { get; set; }
 
     /// <summary>
     /// 餐廳的平均評分（前台 + 後台）。此欄位存儲餐廳的平均客戶評分，供客戶參考和比較。

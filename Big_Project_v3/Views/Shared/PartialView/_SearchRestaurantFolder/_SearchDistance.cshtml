@@ -1,8 +1,6 @@
 ﻿@model IEnumerable<Big_Project_v3.ViewModels.LocationViewModel>
-
 <div id="" class="bg-white p-3 rounded">
-    <div id="
-">
+    <div id="">
         @foreach (var restaurant in Model)
         {
             <div class="restaurant-item d-flex mb-3">
@@ -10,6 +8,13 @@
                 <img src="~/img/輕井澤-封面.jpg" alt="Restaurant Image" class="img-thumbnail me-3" style="width: 120px; height: 80px;">
                 <div>
                     <h6 class="text-primary">@restaurant.Name</h6>
+
+                    <!-- 判斷餐廳是否接受訂單 -->
+                    @if (!restaurant.IsReservationOpen) // 判斷 IsReservationOpen 是否為 false
+                    {
+                        <p class="text-danger">此餐廳暫時無法接受訂單。</p>
+                    }
+
                     <!-- 星級 Bootstrap 樣式 -->
                     @await Html.PartialAsync("PartialView/_SearchRestaurantFolder/StarRating_BootStrap", restaurant.AverageRating)
                     <p>@restaurant.Description</p>
@@ -19,8 +24,9 @@
                     <br />
                     <p>@restaurant.Description</p>
                     <p>$$$ - @restaurant.Address</p>
+
                     @* <p>距離: @restaurant.Distance.ToString("F2") 公里</p> *@
-                    <button class="btn btn-danger">下午7:00</button>
+                    @* <button class="btn btn-danger">下午7:00</button> *@
                 </div>
             </div>
             <hr />

@@ -16,5 +16,7 @@ namespace Big_Project_v3.ViewModels
         public double AverageRating { get; set; }
         public string ?Address { get; set; }
         public string ?Description { get; set; }
+        public bool IsReservationOpen { get; set; }
+
     }
 }

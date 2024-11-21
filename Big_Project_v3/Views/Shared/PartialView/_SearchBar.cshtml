@@ -1,7 +1,7 @@
 ﻿@model Big_Project_v3.Views.Shared.PartialView._SearchBarModel
 @{
 }
-<link href="./css/_SearchBar.css" rel="stylesheet">
+<link href="~/css/_SearchBar.css" rel="stylesheet">
 <body>
     <!-- 主內容容器 -->
     <div class="container-fluid mt-4 p-0">
@@ -210,7 +210,8 @@
 
                             const keyword = document.getElementById('searchKeyword')?.value || ''; // 收集關鍵字
 
-                            fetch('/SearchPage/SortByRating', {
+                            fetch('/SearchPage/
+', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
@@ -237,7 +238,6 @@
                         }
 
                     </script>
-
                     <!-- 中間的地點提示文字 -->
                     <div class="col-9 text-center">
                         <!--col 影響它的位置-->
@@ -307,6 +307,7 @@
                                         // 更新畫面內容
                                         if (district) {
                                             locationSection.innerHTML = `您目前的位置為：台中市${district}`;
+
                                         } else {
                                             locationSection.innerHTML = "您的位置不在台中市範圍內。";
                                         }

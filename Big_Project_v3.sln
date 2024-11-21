@@ -5,6 +5,8 @@ VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Big_Project_v3", "Big_Project_v3\Big_Project_v3.csproj", "{0ED85719-570C-4A07-B585-876C95871B81}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iTable_V2", "..\小夥伴\iTable_小夥伴2號\iTable_V2\iTable_V2\iTable_V2.csproj", "{27AD6DA4-0605-4D2C-A820-2EC211242575}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{0ED85719-570C-4A07-B585-876C95871B81}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0ED85719-570C-4A07-B585-876C95871B81}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0ED85719-570C-4A07-B585-876C95871B81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27AD6DA4-0605-4D2C-A820-2EC211242575}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27AD6DA4-0605-4D2C-A820-2EC211242575}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27AD6DA4-0605-4D2C-A820-2EC211242575}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27AD6DA4-0605-4D2C-A820-2EC211242575}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

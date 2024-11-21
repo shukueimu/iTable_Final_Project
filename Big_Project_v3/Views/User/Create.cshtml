@@ -1,0 +1,86 @@
+﻿@model Big_Project_v3.Models.User
+<br>
+
+<form asp-action="Create" method="post">
+    <div class="container">
+        <!-- 註冊表單 -->
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <fieldset>
+                    <legend class="text-center mb-4">會員註冊</legend>
+
+                    <!-- 姓名欄位 -->
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="Name" name="Name" placeholder="姓名" required />
+                        <label for="Name">姓名</label>
+                    </div>
+
+                    <!-- 帳號欄位 -->
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="UserName" name="UserName" placeholder="帳號 (英文或數字)" pattern="[a-zA-Z0-9]+" title="帳號只能包含英文或數字" required />
+                        <label for="UserName">帳號 (只能包含英文和數字)</label>
+                    </div>
+
+                    <!-- 電子郵件欄位 -->
+                    <div class="form-floating mb-3">
+                        <input type="email" class="form-control" id="ContactEmail" name="ContactEmail" placeholder="電子信箱" required />
+                        <label for="ContactEmail">電子信箱</label>
+                    </div>
+
+                    <!-- 電話欄位 -->
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="ContactPhone" name="ContactPhone" placeholder="電話號碼" pattern=".{8,}" title="電話號碼必須至少8位數" required />
+                        <label for="ContactPhone">電話</label>
+                    </div>
+
+                    <!-- 密碼欄位 -->
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control" id="PasswordHash" name="PasswordHash" placeholder="密碼" required />
+                        <label for="PasswordHash">密碼</label>
+                    </div>
+
+                    <!-- 確認密碼欄位 -->
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control" id="ConfirmPassword" placeholder="確認密碼" required />
+                        <label for="ConfirmPassword">確認密碼</label>
+                    </div>
+
+                    <!-- 隱藏欄位 -->
+                    <input type="hidden" id="CreatedAt" name="CreatedAt" value="" />
+                    <input type="hidden" id="UpdatedAt" name="UpdatedAt" value="" />
+
+                    <!-- 顯示錯誤訊息 -->
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-lg" style="background-color: #FFA500; color: white; border: none;"
+                                onmouseover="this.style.backgroundColor='#FF8C00'"
+                                onmouseout="this.style.backgroundColor='#FFA500'">
+                            註冊
+                        </button>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    document.querySelector("form").addEventListener("submit", async function (event) {
+        var password = document.getElementById("PasswordHash").value;
+        var confirmPassword = document.getElementById("ConfirmPassword").value;
+        var userName = document.getElementById("UserName").value.trim();
+        var contactEmail = document.getElementById("ContactEmail").value.trim();
+        var contactPhone = document.getElementById("ContactPhone").value.trim();
+
+        // 驗證密碼是否一致
+        if (password !== confirmPassword) {
+            event.preventDefault(); // 阻止表單提交
+            alert("確認密碼和密碼不一致，請重新輸入");
+            return;
+        }
+    });
+
+
+
+</script>

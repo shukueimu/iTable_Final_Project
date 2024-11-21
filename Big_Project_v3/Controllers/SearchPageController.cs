@@ -44,6 +44,16 @@ namespace Big_Project_v3.Controllers
         //[Route("SearchPage/SearchRestaurants")]
         public IActionResult SearchRestaurants(string keyword) // 定義搜尋餐廳的方法，接受關鍵字參數
         {
+            // 從資料庫中獲取所有餐廳
+            var restaurants = _context.Restaurants.ToList();
+
+            // 使用迴圈檢查每間餐廳是否接受訂單
+            foreach (var restaurant in restaurants)
+            {
+                // 確保 IsReservationOpen 不為 NULL
+                Console.WriteLine($"餐廳: {restaurant.Name}, 是否接受訂單: {restaurant.IsReservationOpen}");
+            }
+
             // 使用 Console.WriteLine 確認接收到的 keyword 是否正確
             Console.WriteLine("搜尋關鍵字: " + keyword);
 
@@ -71,6 +81,7 @@ namespace Big_Project_v3.Controllers
             {
                 Restaurants = results,   // 將搜尋結果賦值給 ViewModel 中的 Restaurants 屬性
                 SearchKeyword = keyword  // 將關鍵字賦值給 ViewModel 中的 SearchKeyword 屬性
+
             };
 
             // 返回部分檢視 `_SearchRestaurant`，並傳遞 ViewModel
@@ -142,7 +153,8 @@ namespace Big_Project_v3.Controllers
                     Name = r.Name,
                     AverageRating = r.AverageRating ?? 0,
                     Address = r.Address,
-                    Description = r.Description
+                    Description = r.Description,
+                    IsReservationOpen = r.IsReservationOpen // 加入 IsReservationOpen
                 })
                 .ToList();
 
@@ -213,6 +225,8 @@ namespace Big_Project_v3.Controllers
             double userLng = userLocation.Longitude;
             bool sortByDistance = userLocation.SortByDistance;
 
+
+
             // 查詢餐廳並按距離或名稱排序
             var restaurants = _context.Restaurants
                 .AsEnumerable()
@@ -271,7 +285,7 @@ namespace Big_Project_v3.Controllers
         // 私有方法：計算距離
         private double CalculateDistance(double lat1, double lng1, double lat2, double lng2)
         {
-            const double EarthRadius = 6371; // 地球半徑（公里）
+            const double EarthRadius = 6371; // 地球半徑，單位：公里
             double dLat = ToRadians(lat2 - lat1);
             double dLng = ToRadians(lng2 - lng1);
 
@@ -280,14 +294,14 @@ namespace Big_Project_v3.Controllers
                        Math.Sin(dLng / 2) * Math.Sin(dLng / 2);
 
             double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
-            return EarthRadius * c; // 返回距離
+            return EarthRadius * c; // 返回兩點間的距離
         }
 
-        // 私有方法：角度轉弧度
         private double ToRadians(double angle)
         {
             return angle * Math.PI / 180;
         }
+
 
         [HttpPost]
         public IActionResult FilterRestaurantsByPrice([FromBody] PriceFilterViewModel filter)

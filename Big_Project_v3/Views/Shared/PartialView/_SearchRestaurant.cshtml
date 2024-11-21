@@ -33,10 +33,10 @@
          p-3: 設定四周的內距為 3
          rounded: 設置圓角邊框 -->
     @* 顯示餐廳列表 *@
-    <h5 class="text-dark">餐廳列表</h5>
+    @* <h5 class="text-dark">餐廳列表</h5> *@
     <!-- text-dark: 設定文字顏色為深色 -->
     <!-- 確認篩選結果 -->
-    <p>篩選後的餐廳數量: @Model.Restaurants.Count()</p>
+    @* <p>篩選後的餐廳數量: @Model.Restaurants.Count()</p> *@
 
 @*     @foreach (var restaurant in Model.Restaurants)
     {
@@ -69,7 +69,7 @@
                 @restaurant.Description
                 
                 <p>$$$ - @restaurant.Address</p>
-                <button class="btn btn-danger">下午7:00</button>
+                @* <button class="btn btn-danger">下午7:00</button> *@
                 <!-- btn: 基本按鈕樣式
                      btn-danger: 設定按鈕顏色為紅色 -->
             </div>

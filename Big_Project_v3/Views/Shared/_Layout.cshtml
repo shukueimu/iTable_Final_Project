@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    @* <link rel="stylesheet" href="~/restaurant.styles.css" asp-append-version="true" /> *@
+    <link rel="stylesheet" href="~/restaurant.styles.css" asp-append-version="true" />
 </head>
 <body>
     <header>
@@ -17,7 +17,7 @@
             @* iTABLE_LOGO *@
             <div class="ms-4">
                 <a class="navbar-brand" asp-controller="Restaurant" asp-action="Index">
-                    <img class="mylogo" src="~/img/logo.png" alt="LOGO" style="width:170px;height:70px" />
+                    <img class="mylogo" src="~/LOGO.png" alt="LOGO" style="width:170px;height:70px" />
                 </a>
             </div>
             @* 會員按鈕 *@
@@ -33,10 +33,41 @@
                     <li><a class="dropdown-item" href="#">我的個人檔案</a></li>
                     <li><a class="dropdown-item" href="#">我的用餐紀錄</a></li>
                     <li><a class="dropdown-item" href="#">我的珍藏餐廳</a></li>
+                    <li>
+                        <!-- 登出按鈕，觸發 Modal -->
+                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">登出</a>
+                    </li>
                 </ul>
             </div>
         </nav>
     </header>
+    @* Modal ------------------------ *@
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title" id="logoutModalLabel">是否登出</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    登出後將會跳轉到登入頁面
+                </div>
+
+                
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <!-- 取消按鈕 -->
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">取消</button>
+                    <!-- 確認登出 -->
+                    <a href="@Url.Action("Logout", "User")" class="btn btn-primary">確認</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    @* Modal ------------------------ *@
 
     <div style="background-color:#FFFDF6">
         <main role="main" class="pb-3">
@@ -120,7 +151,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    @* <script src="~/js/Index.js" asp-append-version="true"></script> *@
+    <script src="~/js/Index.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
