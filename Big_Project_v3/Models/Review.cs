@@ -23,7 +23,7 @@ public partial class Review
     /// <summary>
     /// 評分（1-5 星）（前台 + 後台）。此欄位存儲使用者對餐廳的評分，用於計算平均評分和顯示給其他用戶。
     /// </summary>
-    public int? Rating { get; set; }
+    public double? Rating { get; set; }
 
     /// <summary>
     /// 評論內容（前台 + 後台）。此欄位存儲使用者對餐廳的詳細評論，用於提供其他用戶參考。

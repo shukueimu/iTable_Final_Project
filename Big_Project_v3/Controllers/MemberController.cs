@@ -239,7 +239,79 @@ namespace Big_Project_v3.Controllers
             return Json(new { success = true, message = "已取消珍藏" }); // 成功取消
         }
 
+        // AddComment 方法
+        public IActionResult AddComment(int restaurantId)
+        {
+            try
+            {
+                if (restaurantId <= 0)
+                {
+                    return BadRequest("無效的餐廳 ID");
+                }
 
+                var viewModel = new ReviewViewModel
+                {
+                    RestaurantID = restaurantId,
+                    Rating = 0.0, // 預設為 0.0
+                    ReviewText = string.Empty, // 預設為空字串
+                    ReviewDate = DateTime.Now
+                };
+
+                // 返回 Shared 文件夾中的部分視圖
+                return PartialView("~/Views/Shared/PartialView/_MemberFolder/_AddComment.cshtml", viewModel);
+            }
+            catch (Exception ex)
+            {
+                // 錯誤日誌
+                Console.WriteLine($"Error in AddComment: {ex.Message}");
+                return StatusCode(500, "伺服器內部錯誤");
+            }
+        }
+
+        // SubmitComment 方法
+        [HttpPost]
+        public async Task<IActionResult> SubmitComment([FromBody] ReviewViewModel model)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+
+            if (!userId.HasValue)
+            {
+                return Json(new { success = false, message = "使用者未登入" }); // 未登入
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    // 新增評論至資料庫
+                    var review = new Review
+                    {
+                        UserId = userId.Value, // 假設使用者已登入，獲取 UserID
+                        RestaurantId = model.RestaurantID, // 餐廳 ID
+                        Rating = model.Rating, // 評分 (double)
+                        ReviewText = model.ReviewText, // 評論文字
+                        ReviewDate = DateOnly.FromDateTime(DateTime.Now), // 將 DateTime 轉換為 DateOnly
+                        CreatedAt = DateTime.Now, // 設定建立時間
+                        UpdatedAt = DateTime.Now // 設定更新時間
+                    };
+
+                    _context.Reviews.Add(review); // 加入資料庫
+                    await _context.SaveChangesAsync();
+
+                    return Json(new { success = true, message = "評論已送出" }); // 回傳成功狀態
+                }
+                catch (Exception ex)
+                {
+                    // 錯誤日誌
+                    Console.WriteLine($"Error in SubmitComment: {ex.Message}");
+                    return Json(new { success = false, message = "評論提交失敗，請稍後再試。" });
+                }
+            }
+
+            // 如果模型驗證失敗
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+            return Json(new { success = false, message = string.Join("; ", errors) });
+        }
 
 
         //    [HttpGet]

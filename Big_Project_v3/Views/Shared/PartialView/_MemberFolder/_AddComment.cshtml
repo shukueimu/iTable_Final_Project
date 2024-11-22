@@ -1,11 +1,16 @@
-﻿<form id="addCommentForm">
+﻿@model Big_Project_v3.ViewModels.ReviewViewModel
+
+<form id="addCommentForm">
+    <!-- 隱藏的 RestaurantID 欄位 -->
+    <input type="hidden" id="restaurantId" name="RestaurantID" value="@Model.RestaurantID" />
+
     <div class="mb-3">
         <label for="rating">評分：</label>
-        @await Html.PartialAsync("PartialView/_SearchRestaurantFolder/StarRating_CSS")
+        @await Html.PartialAsync("PartialView/_SearchRestaurantFolder/StarRating_CSS", Model.Rating)
     </div>
     <div class="mb-3">
         <label for="reviewText">留言：</label>
-        <textarea id="reviewText" name="ReviewText" class="form-control" rows="3"></textarea>
+        <textarea id="reviewText" name="ReviewText" class="form-control" rows="3" required></textarea>
     </div>
-    <button type="button" class="fw-bold btn btn-success" onclick="submitComment()">送出評論</button>
+    <button type="button" class="btn btn-success" id="submitCommentBtn">送出評論</button>
 </form>

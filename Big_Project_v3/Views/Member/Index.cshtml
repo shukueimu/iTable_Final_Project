@@ -9,7 +9,7 @@
 <div class="container">
     <!-- Header 區塊 -->
     <br />
-    <div class="row mt-4" style="margin-top:0px !important">
+    <div class="row mt-4">
         <div class="col-12 text-center border-bottom pb-3">
             <h3>@Model.UserName（@Model.Name） 您好：</h3>
             @* <p>會員起始日期：2024年11月</p> *@
@@ -45,13 +45,33 @@
                 }
                 else
                 {
-                    <!-- 如果沒有訂位記錄，顯示 _SearchBar 部分視圖 -->
+                    <!-- 如果沒有訂位記錄，顯示提示訊息 -->
                     <h1>您目前沒有任何訂位記錄</h1>
                 }
             </div>
         </div>
     </div>
 </div>
+
+<!-- 模態框 -->
+<div id="addCommentModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">新增評論</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="addCommentContent"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 引入 Bootstrap CSS 和 JS, jQuery -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- 引入 Axios 庫 -->
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -85,9 +105,10 @@
             });
     }
 
-    // 使用事件委託來處理所有 .remove-favorite-btn 按鈕的點擊事件
+    // 使用事件委託來處理所有 .remove-favorite-btn 和 .add-comment-btn 按鈕的點擊事件
     document.addEventListener('DOMContentLoaded', function () {
         document.body.addEventListener('click', function (event) {
+            // 處理「取消珍藏」按鈕
             if (event.target && event.target.matches('.remove-favorite-btn')) {
                 var restaurantId = event.target.getAttribute('data-restaurant-id');
                 if (restaurantId) {
@@ -96,8 +117,19 @@
                     console.error('無效的餐廳 ID');
                 }
             }
+
+            // 處理「評論餐廳」按鈕
+            if (event.target && event.target.matches('.add-comment-btn')) {
+                var restaurantId = event.target.getAttribute('data-restaurant-id');
+                if (restaurantId) {
+                    openAddCommentModal(parseInt(restaurantId));
+                } else {
+                    console.error('無效的餐廳 ID');
+                }
+            }
         });
     });
+
 
     // 定義 removeFavorite 函數為全局
     window.removeFavorite = function (RestaurantID) {
@@ -126,5 +158,68 @@
             .catch(error => {
                 console.error('Error:', error.response || error.message); // 錯誤記錄
             });
+    };
+
+    // 定義 openAddCommentModal 函數為全局
+    window.openAddCommentModal = function (RestaurantID) {
+        console.log("openAddCommentModal called with RestaurantID:", RestaurantID); // 檢查參數
+
+        if (RestaurantID === 0) {
+            console.error('無效的餐廳 ID，無法新增評論。');
+            return;
+        }
+
+        console.log("Loading AddComment modal for RestaurantID:", RestaurantID);
+
+        // 使用 jQuery AJAX 請求
+        $.ajax({
+            url: '/Member/AddComment',
+            type: 'GET',
+            data: { restaurantId: RestaurantID },
+            success: function (response) {
+                console.log("AddComment AJAX success");
+                $('#addCommentContent').html(response);
+                $('#addCommentModal').modal('show');
+            },
+            error: function (xhr) {
+                console.error('發生錯誤:', xhr.responseText);
+                alert('無法載入評論表單，請稍後再試。');
+            }
+        });
+    };
+
+    // 使用事件委託處理「送出評論」按鈕的點擊事件
+    document.addEventListener('click', function (event) {
+        if (event.target && event.target.matches('#submitCommentBtn')) {
+            submitComment();
+        }
+    });
+
+    // 定義 submitComment 函數為全局
+    window.submitComment = function () {
+        const formData = {
+            Rating: parseFloat($('input[name="Rating"]:checked').val()), // 確保 Rating 為 double
+            ReviewText: $('#reviewText').val(),
+            RestaurantID: parseInt($('#restaurantId').val()) // 從隱藏欄位取得並轉為 int
+        };
+
+        console.log('Submitting comment:', formData);
+
+        $.ajax({
+            url: '/Member/SubmitComment', // 控制器動作
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function () {
+                console.log("SubmitComment AJAX success");
+                // 取消成功後，重新載入收藏餐廳部分視圖
+                $('#addCommentModal').modal('hide');
+                loadPartialView('_FavoriteRestaurants');
+            },
+            error: function () {
+                console.error("SubmitComment AJAX error");
+                alert('評論提交失敗，請稍後重試。');
+            }
+        });
     };
  </script>
