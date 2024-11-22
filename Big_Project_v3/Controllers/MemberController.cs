@@ -45,7 +45,11 @@ namespace Big_Project_v3.Controllers
                                 : DateTime.MinValue,
                             ReservationTime = r.ReservationTime.HasValue
                                 ? r.ReservationTime.Value.ToTimeSpan()
-                                : TimeSpan.Zero
+                                : TimeSpan.Zero,
+                            PhotoUrl = _context.Photos              // 從 Photos 表中查詢餐廳圖片
+                                .Where(p => p.RestaurantId == r.RestaurantId && p.PhotoType == "LOGO")
+                                .Select(p => p.PhotoUrl)
+                                .FirstOrDefault(),                  // 僅取第一張圖片
                         })
                         .ToList()
                 })
@@ -73,6 +77,7 @@ namespace Big_Project_v3.Controllers
                 return RedirectToAction("Login", "User");
             }
 
+            // 訂位邏輯
             if (partialViewName == "_Reservation")
             {
                 var reservations = await _context.Reservations
@@ -108,8 +113,15 @@ namespace Big_Project_v3.Controllers
                 return PartialView("PartialView/_MemberFolder/_Reservation", reservations);
             }
 
+            // 珍藏餐廳邏輯
             if (partialViewName == "_FavoriteRestaurants")
             {
+                // 如果未登錄，重定向到登入頁面
+                if (!userId.HasValue)
+                {
+                    return RedirectToAction("Login", "User");
+                }
+
                 var favoriteRestaurants = await _context.Favorites
                     .Where(f => f.UserId == userId) // 過濾目前的使用者
                     .Include(f => f.Restaurant)    // 載入關聯的餐廳資料
@@ -126,7 +138,6 @@ namespace Big_Project_v3.Controllers
                     })
                     .ToListAsync();
 
-
                 // 如果使用者沒有收藏任何餐廳，回傳提示訊息
                 if (!favoriteRestaurants.Any())
                 {
@@ -135,6 +146,42 @@ namespace Big_Project_v3.Controllers
 
                 // 傳回收藏餐廳部分視圖
                 return PartialView("PartialView/_MemberFolder/_FavoriteRestaurants", favoriteRestaurants);
+            }
+
+            if (partialViewName == "_Comment")
+            {
+                var reviews = await _context.Reviews
+                    .Where(r => r.UserId == userId)      // 過濾目前的使用者
+                    .Include(r => r.Restaurant)          // 顯式載入關聯的餐廳資料
+                    .Select(r => new ReviewViewModel
+                    {
+                        ReviewID = r.ReviewId,           // 評論的 ID
+                        Rating = r.Rating ?? 0,          // 評分
+                        ReviewText = r.ReviewText,       // 評論文字
+                        ReviewDate = r.ReviewDate.HasValue
+                            ? r.ReviewDate.Value.ToDateTime(TimeOnly.MinValue)
+                            : DateTime.MinValue,         // 評論日期
+                        RestaurantName = r.Restaurant != null
+                            ? r.Restaurant.Name
+                            : "未知餐廳",                // 餐廳名稱
+                        //RestaurantDescription = r.Restaurant != null
+                        //    ? r.Restaurant.Description
+                        //    : "無描述",                  // 餐廳描述
+                        PhotoURL = _context.Photos
+                            .Where(p => p.RestaurantId == r.RestaurantId && p.PhotoType == "LOGO")
+                            .Select(p => p.PhotoUrl)
+                            .FirstOrDefault()            // 餐廳圖片
+                    })
+                    .ToListAsync();
+
+                // 如果沒有評論記錄，顯示空評論訊息
+                if (!reviews.Any())
+                {
+                    return Content("<h4>你的評論</h4><p>目前沒有評論記錄。</p>", "text/html");
+                }
+
+                // 返回評論部分視圖
+                return PartialView("PartialView/_MemberFolder/_Comment", reviews);
             }
 
             // 如果請求的是其他部分視圖
@@ -146,6 +193,7 @@ namespace Big_Project_v3.Controllers
             // 預設回傳錯誤頁面或空白視圖（避免缺少回傳值路徑）
             return BadRequest("Invalid partial view name.");
         }
+
 
 
         [HttpGet]

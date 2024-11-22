@@ -6,9 +6,9 @@
         @foreach (var restaurant in Model)
         {
             <div class="list-group-item d-flex align-items-center">
-                <img src="@restaurant.PhotoUrl" alt="餐廳圖片" class="img-fluid rounded me-3" style="width: 150px; height: auto;">
+                <img src="@restaurant.PhotoUrl" alt="餐廳圖片" class="img-fluid rounded me-3" style="width: 200px; height: auto;">
                 <div>
-                    <h4>@restaurant.Name</h4>
+                    <h4 class="fw-bolder card-title">@restaurant.Name</h4>
                     <p>@restaurant.Description</p>
                     <p>收藏時間：@restaurant.AddedAt</p>
                 </div>

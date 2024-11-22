@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<Big_Project_v3.ViewModels.ReservationViewModel>
 
 <div class="container mt-4">
-    <h4>近期訂位</h4>
+    <h2 class="fw-bold">近期訂位</h2>
     <div class="row">
         @foreach (var reservation in Model)
         {
@@ -12,17 +12,18 @@
                         <!-- 餐廳圖片 -->
                         <div class="row">
                             <div class="col-md-3">
-                                <img src="https://via.placeholder.com/150" alt="餐廳圖片" class="img-fluid rounded">
+                                <img src="@reservation.PhotoUrl" alt="餐廳圖片" class="img-fluid rounded me-3" style="width: 200px; height: auto;">
+
                             </div>
                             <div class="col-md-9">
                                 <!-- 訂位資訊 -->
-                                <h5 class="card-title">@reservation.Name</h5>
+                                <h4 class="fw-bolder card-title">@reservation.Name</h4>
                                 @if (reservation.ReservationStatus == "已確認")
                                 {
-                                    <p class="text-success fw-bold">✔ @reservation.ReservationStatus 訂位</p>
+                                    <h5 class="text-success fw-bold">✔ @reservation.ReservationStatus 訂位</h5>
                                 }else
                                 {
-                                    <p class="text-danger fw-bold">✘ @reservation.ReservationStatus 訂位</p>
+                                    <h5 class="text-danger fw-bold">✘ @reservation.ReservationStatus 訂位</h5>
                                 }
                                 <p class="mb-1">
                                     <i class="fas fa-user"></i> 成人人數：@reservation.NumAdults<br />
