@@ -1,5 +1,4 @@
-﻿@* @model Big_Project_v3.ViewModels.UserViewModel *@
-@model Big_Project_v3.ViewModels.UserViewModel
+﻿@model Big_Project_v3.ViewModels.UserViewModel
 
 @{
     ViewData["Title"] = "會員中心";
@@ -32,15 +31,13 @@
                     <a href="#" onclick="loadPartialView('_Comment')">評論</a>
                 </li>
                 <li class="fw-bold fs-5 list-group-item">
-                       <a href="/User/EditProfile">帳戶詳細資料</a>
+                    <a href="/User/EditProfile">帳戶詳細資料</a>
                 </li>
             </ul>
         </div>
-
         <!-- Main Content 區塊 -->
         <div class="col-md-9">
             <div id="mainContent">
-
                 @if (Model.Reservations != null && Model.Reservations.Any())
                 {
                     <!-- 如果有訂位記錄，渲染 _Reservation 部分視圖 -->
@@ -55,20 +52,22 @@
         </div>
     </div>
 </div>
-            <script>
-                function loadPartialView(viewName) {
-                    fetch(`/Member/LoadFavoriteRestaurants`)
-                        .then(response => response.text())
-                        .then(html => {
-                            document.getElementById('mainContent').innerHTML = html;
-                        });
-                }
 
-            </script>
+<!-- 引入 Axios 庫 -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-    <script>
-        function loadPartialView(viewName) {
-            // 發送 AJAX 請求到 Controller 的 LoadPartialView 方法
+<!-- 主視圖的 JavaScript 區塊 -->
+ <script>
+    function loadFavoriteRestaurants() {
+        fetch(`/Member/LoadFavoriteRestaurants`)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('mainContent').innerHTML = html;
+            });
+    }
+
+    function loadPartialView(viewName) {
+        // 發送 AJAX 請求到 Controller 的 LoadPartialView 方法
         fetch(`/Member/LoadPartialView?partialViewName=${viewName}`)
             .then(response => {
                 if (!response.ok) {
@@ -84,6 +83,48 @@
             .catch(error => {
                 console.error('Error loading partial view:', error);
             });
+    }
 
+    // 使用事件委託來處理所有 .remove-favorite-btn 按鈕的點擊事件
+    document.addEventListener('DOMContentLoaded', function () {
+        document.body.addEventListener('click', function (event) {
+            if (event.target && event.target.matches('.remove-favorite-btn')) {
+                var restaurantId = event.target.getAttribute('data-restaurant-id');
+                if (restaurantId) {
+                    removeFavorite(parseInt(restaurantId));
+                } else {
+                    console.error('無效的餐廳 ID');
+                }
+            }
+        });
+    });
+
+    // 定義 removeFavorite 函數為全局
+    window.removeFavorite = function (RestaurantID) {
+        console.log("removeFavorite called with RestaurantID:", RestaurantID); // 檢查參數
+
+        if (RestaurantID === 0) {
+            console.error('無效的餐廳 ID，無法取消珍藏。');
+            return;
         }
-    </script>
+
+        console.log("Removing favorite for RestaurantID:", RestaurantID);
+
+        // 使用 axios 發送 AJAX 請求
+        axios.post('/Member/RemoveFavorite', { RestaurantId: RestaurantID }) // 使用 RestaurantId
+            .then(response => {
+                console.log("AJAX response:", response);
+                const data = response.data;
+                if (data.success) {
+                    // 成功取消珍藏，重新載入收藏餐廳部分視圖
+                    loadPartialView('_FavoriteRestaurants');
+                } else {
+                    // 取消失敗，僅記錄錯誤
+                    console.error('取消珍藏失敗:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error.response || error.message); // 錯誤記錄
+            });
+    };
+ </script>

@@ -14,5 +14,6 @@
         public string AddedAt { get; set; }        // 收藏日期
         public string? PhotoUrl { get; set; }
         public string PhotoType { get; set; }
+        public string SpecialRequests { get; set; }
     }
 }

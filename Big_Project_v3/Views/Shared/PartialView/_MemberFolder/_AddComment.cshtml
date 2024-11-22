@@ -1,0 +1,11 @@
+﻿<form id="addCommentForm">
+    <div class="mb-3">
+        <label for="rating">評分：</label>
+        @await Html.PartialAsync("PartialView/_SearchRestaurantFolder/StarRating_CSS")
+    </div>
+    <div class="mb-3">
+        <label for="reviewText">留言：</label>
+        <textarea id="reviewText" name="ReviewText" class="form-control" rows="3"></textarea>
+    </div>
+    <button type="button" class="btn btn-success" onclick="submitComment()">送出評論</button>
+</form>

@@ -33,6 +33,8 @@ namespace Big_Project_v3.Controllers
                     Name = u.Name,
                     Reservations = _context.Reservations
                         .Where(r => r.UserId == userId)
+                        .OrderByDescending(r => r.ReservationDate) // 第一排序條件：日期由近到遠
+                        .ThenByDescending(r => r.ReservationTime)  // 第二排序條件：時間由早到晚
                         .Select(r => new ReservationViewModel
                         {
                             Name = r.Restaurant != null ? r.Restaurant.Name : "未知餐廳",
@@ -40,6 +42,7 @@ namespace Big_Project_v3.Controllers
                             ReservationStatus = r.ReservationStatus,
                             NumAdults = r.NumAdults ?? 0,
                             NumChildren = r.NumChildren ?? 0,
+                            SpecialRequests = r.SpecialRequests,
                             ReservationDate = r.ReservationDate.HasValue
                                 ? r.ReservationDate.Value.ToDateTime(TimeOnly.MinValue)
                                 : DateTime.MinValue,
@@ -54,6 +57,7 @@ namespace Big_Project_v3.Controllers
                         .ToList()
                 })
                 .FirstOrDefaultAsync();
+
 
             if (user == null)
             {
@@ -125,16 +129,19 @@ namespace Big_Project_v3.Controllers
                 var favoriteRestaurants = await _context.Favorites
                     .Where(f => f.UserId == userId) // 過濾目前的使用者
                     .Include(f => f.Restaurant)    // 載入關聯的餐廳資料
+                    .OrderByDescending(f => f.AddedAt)  // 根據 AddedAt 降序排序
+                    .ThenByDescending(f => f.FavoriteId) // 根據 FavoriteId 降序排序
                     .Select(f => new FavoriteViewModel
                     {
-                        Name = f.Restaurant.Name,                // 餐廳名稱
-                        Description = f.Restaurant.Description, // 餐廳描述
-                        PhotoUrl = _context.Photos              // 從 Photos 表中查詢餐廳圖片
+                        Name = f.Restaurant.Name,
+                        Description = f.Restaurant.Description,
+                        PhotoUrl = _context.Photos
                             .Where(p => p.RestaurantId == f.RestaurantId && p.PhotoType == "LOGO")
                             .Select(p => p.PhotoUrl)
-                            .FirstOrDefault(),                  // 僅取第一張圖片
+                            .FirstOrDefault(),
                         AddedAt = f.AddedAt.HasValue ? f.AddedAt.Value.ToString("yyyy/MM/dd") : "未知日期",
-                        AverageRating = f.Restaurant.AverageRating ?? 0
+                        AverageRating = f.Restaurant.AverageRating ?? 0,
+                        RestaurantId = f.RestaurantId // 確保設置 RestaurantId
                     })
                     .ToListAsync();
 
@@ -153,20 +160,20 @@ namespace Big_Project_v3.Controllers
                 var reviews = await _context.Reviews
                     .Where(r => r.UserId == userId)      // 過濾目前的使用者
                     .Include(r => r.Restaurant)          // 顯式載入關聯的餐廳資料
+                    .OrderByDescending(r => r.ReviewDate) // 依 ReviewDate 降序排序
+                    .ThenByDescending(r => r.ReviewId)   // 若日期相同則依 ReviewID 降序排序
                     .Select(r => new ReviewViewModel
                     {
                         ReviewID = r.ReviewId,           // 評論的 ID
                         Rating = r.Rating ?? 0,          // 評分
                         ReviewText = r.ReviewText,       // 評論文字
+                        RestaurantID = r.RestaurantId ?? 0,   // 餐廳的 ID
                         ReviewDate = r.ReviewDate.HasValue
                             ? r.ReviewDate.Value.ToDateTime(TimeOnly.MinValue)
                             : DateTime.MinValue,         // 評論日期
                         RestaurantName = r.Restaurant != null
                             ? r.Restaurant.Name
                             : "未知餐廳",                // 餐廳名稱
-                        //RestaurantDescription = r.Restaurant != null
-                        //    ? r.Restaurant.Description
-                        //    : "無描述",                  // 餐廳描述
                         PhotoURL = _context.Photos
                             .Where(p => p.RestaurantId == r.RestaurantId && p.PhotoType == "LOGO")
                             .Select(p => p.PhotoUrl)
@@ -194,90 +201,127 @@ namespace Big_Project_v3.Controllers
             return BadRequest("Invalid partial view name.");
         }
 
-
-
-        [HttpGet]
-        public async Task<IActionResult> LoadFavoriteRestaurants()
+        // 取消收藏
+        // 取消收藏
+        [HttpPost]
+        [Route("Member/RemoveFavorite")]
+        public async Task<IActionResult> RemoveFavorite([FromBody] FavoriteViewModel model)
         {
-            // 從 Session 中取得 UserId
-            var userId = HttpContext.Session.GetInt32("UserId");
-
-            // 如果未登入，重定向到登入頁
-            if (!userId.HasValue)
+            if (model.RestaurantId == null)
             {
-                return RedirectToAction("Login", "User");
+                return Json(new { success = false, message = "餐廳ID未提供" });
             }
 
-            // 查詢目前使用者的收藏餐廳
-            var favoriteRestaurants = await _context.Favorites
-                .Where(f => f.UserId == userId) // 過濾目前的使用者
-                .Include(f => f.Restaurant)    // 顯式載入關聯的餐廳資料
-                .Select(f => new FavoriteViewModel
-                {
-                    Name = f.Restaurant.Name,
-                    AddedAt = f.AddedAt.HasValue ? f.AddedAt.Value.ToString("yyyy/MM/dd") : "未知日期",
-                    AverageRating = f.Restaurant.AverageRating ?? 0, // 餐廳評分
-                    Description = f.Restaurant.Description // 餐廳描述
-                })
-                .ToListAsync();
-
-            var test = await _context.Favorites
-    .Where(f => f.UserId == userId)
-    .Include(f => f.Restaurant)
-    .ToListAsync();
-
-            foreach (var favorite in test)
-            {
-                Console.WriteLine($"餐廳名稱: {favorite.Restaurant?.Name}, 描述: {favorite.Restaurant?.Description}");
-            }
-
-
-            foreach (var item in favoriteRestaurants)
-            {
-                Console.WriteLine($"餐廳名稱: {item.Name}, 評分: {item.AverageRating}, 收藏日期: {item.AddedAt}");
-            }
-
-
-            // 如果沒有收藏餐廳，顯示訊息
-            if (!favoriteRestaurants.Any())
-            {
-                return Content("<h1>您目前沒有收藏任何餐廳</h1>", "text/html");
-            }
-
-            // 返回收藏餐廳的部分視圖
-            return PartialView("PartialView/_MemberFolder/_FavoriteRestaurants", favoriteRestaurants);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> TestFavoriteDescriptions()
-        {
+            // 從 Session 獲取當前使用者的 UserID
             var userId = HttpContext.Session.GetInt32("UserId");
 
             if (!userId.HasValue)
             {
-                return Content("尚未登入，無法測試。");
+                return Json(new { success = false, message = "使用者未登入" }); // 未登入
             }
 
-            // 查詢收藏餐廳並載入關聯的餐廳資料
-            var test = await _context.Favorites
-                .Where(f => f.UserId == userId)
-                .Include(f => f.Restaurant)
-                .Select(f => new
-                {
-                    FavoriteID = f.FavoriteId,
-                    RestaurantName = f.Restaurant.Name,
-                    RestaurantDescription = f.Restaurant.Description,
-                    AddedAt = f.AddedAt
-                })
-                .ToListAsync();
-            Console.WriteLine($"查詢結果：找到 {test.Count} 筆記錄");
-            foreach (var item in test)
+            // 從資料庫中查詢收藏的餐廳資料
+            var favorite = await _context.Favorites
+                .FirstOrDefaultAsync(f => f.UserId == userId && f.RestaurantId == model.RestaurantId);
+
+            if (favorite == null)
             {
-                Console.WriteLine($"FavoriteID: {item.FavoriteID}, 餐廳名稱: {item.RestaurantName}, 描述: {item.RestaurantDescription}");
+                return Json(new { success = false, message = "找不到對應的收藏資料" }); // 資料不存在
             }
-            // 將結果轉換成 JSON 返回
-            return Json(test);
+
+            // 刪除收藏
+            _context.Favorites.Remove(favorite);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "已取消珍藏" }); // 成功取消
         }
+
+
+
+        //    [HttpGet]
+        //    public async Task<IActionResult> LoadFavoriteRestaurants()
+        //    {
+        //        // 從 Session 中取得 UserId
+        //        var userId = HttpContext.Session.GetInt32("UserId");
+
+        //        // 如果未登入，重定向到登入頁
+        //        if (!userId.HasValue)
+        //        {
+        //            return RedirectToAction("Login", "User");
+        //        }
+
+        //        // 查詢目前使用者的收藏餐廳
+        //        var favoriteRestaurants = await _context.Favorites
+        //            .Where(f => f.UserId == userId) // 過濾目前的使用者
+        //            .Include(f => f.Restaurant)    // 顯式載入關聯的餐廳資料
+        //            .Select(f => new FavoriteViewModel
+        //            {
+        //                Name = f.Restaurant.Name,
+        //                AddedAt = f.AddedAt.HasValue ? f.AddedAt.Value.ToString("yyyy/MM/dd") : "未知日期",
+        //                AverageRating = f.Restaurant.AverageRating ?? 0, // 餐廳評分
+        //                Description = f.Restaurant.Description, // 餐廳描述
+        //                RestaurantId = f.RestaurantId,      // 傳遞 Restaurant ID
+        //            })
+        //            .ToListAsync();
+
+        //        var test = await _context.Favorites
+        //.Where(f => f.UserId == userId)
+        //.Include(f => f.Restaurant)
+        //.ToListAsync();
+
+        //        foreach (var favorite in test)
+        //        {
+        //            Console.WriteLine($"餐廳名稱: {favorite.Restaurant?.Name}, 描述: {favorite.Restaurant?.Description}");
+        //        }
+
+
+        //        foreach (var item in favoriteRestaurants)
+        //        {
+        //            Console.WriteLine($"餐廳名稱: {item.Name}, 評分: {item.AverageRating}, 收藏日期: {item.AddedAt}");
+        //        }
+
+
+        //        // 如果沒有收藏餐廳，顯示訊息
+        //        if (!favoriteRestaurants.Any())
+        //        {
+        //            return Content("<h1>您目前沒有收藏任何餐廳</h1>", "text/html");
+        //        }
+
+        //        // 返回收藏餐廳的部分視圖
+        //        return PartialView("PartialView/_MemberFolder/_FavoriteRestaurants", favoriteRestaurants);
+        //    }
+
+        //[HttpGet]
+        //public async Task<IActionResult> TestFavoriteDescriptions()
+        //{
+        //    var userId = HttpContext.Session.GetInt32("UserId");
+
+        //    if (!userId.HasValue)
+        //    {
+        //        return Content("尚未登入，無法測試。");
+        //    }
+
+        //    // 查詢收藏餐廳並載入關聯的餐廳資料
+        //    var test = await _context.Favorites
+        //        .Where(f => f.UserId == userId)
+        //        .Include(f => f.Restaurant)
+        //        .Select(f => new
+        //        {
+        //            FavoriteID = f.FavoriteId,
+        //            RestaurantName = f.Restaurant.Name,
+        //            RestaurantDescription = f.Restaurant.Description,
+        //            AddedAt = f.AddedAt,
+        //            RestaurantId = f.RestaurantId,      // 傳遞 Restaurant ID
+        //        })
+        //        .ToListAsync();
+        //    Console.WriteLine($"查詢結果：找到 {test.Count} 筆記錄");
+        //    foreach (var item in test)
+        //    {
+        //        Console.WriteLine($"FavoriteID: {item.FavoriteID}, 餐廳名稱: {item.RestaurantName}, 描述: {item.RestaurantDescription}");
+        //    }
+        //    // 將結果轉換成 JSON 返回
+        //    return Json(test);
+        //}
 
     }
 }

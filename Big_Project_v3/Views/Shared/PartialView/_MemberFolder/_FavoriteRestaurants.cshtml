@@ -6,13 +6,19 @@
         @foreach (var restaurant in Model)
         {
             <div class="list-group-item d-flex align-items-center">
-                <img src="@restaurant.PhotoUrl" alt="餐廳圖片" class="img-fluid rounded me-3" style="width: 200px; height: auto;">
+                <img src="@restaurant.PhotoUrl" alt="餐廳圖片" class="img-fluid rounded me-3" style="width: 200px; height: 200px;">
                 <div>
                     <h4 class="fw-bolder card-title">@restaurant.Name</h4>
                     <p>@restaurant.Description</p>
                     <p>收藏時間：@restaurant.AddedAt</p>
+                    <!-- 臨時添加，用於檢查 RestaurantId -->
+                    <p>Restaurant ID: @restaurant.RestaurantId</p>
                 </div>
             </div>
+            <!-- 移除 onclick 屬性，使用事件委託 -->
+            <button type="button" class="fw-bold btn btn-danger remove-favorite-btn" data-restaurant-id="@restaurant.RestaurantId">取消珍藏</button>
+            //為了更好地管理動態加載的部分視圖中的按鈕事件，建議使用事件委託。這樣可以避免因為部分視圖通過 AJAX 加載後，按鈕的事件無法正確綁定。
+            <hr />
         }
     </div>
 </div>
