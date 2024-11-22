@@ -1,2 +1,18 @@
-﻿<h4>你的珍藏餐廳</h4>
-<p>尚未添加任何餐廳到珍藏清單。</p>
+﻿@model IEnumerable<Big_Project_v3.ViewModels.FavoriteViewModel>
+
+<div class="container mt-4">
+    <h2 class="fw-bold">珍藏餐廳</h2>
+    <div class="list-group">
+        @foreach (var restaurant in Model)
+        {
+            <div class="list-group-item d-flex align-items-center">
+                <img src="@restaurant.PhotoUrl" alt="餐廳圖片" class="img-fluid rounded me-3" style="width: 150px; height: auto;">
+                <div>
+                    <h4>@restaurant.Name</h4>
+                    <p>@restaurant.Description</p>
+                    <p>收藏時間：@restaurant.AddedAt</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>

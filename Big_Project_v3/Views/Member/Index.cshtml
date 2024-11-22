@@ -52,26 +52,38 @@
                     <h1>您目前沒有任何訂位記錄</h1>
                 }
             </div>
+        </div>
+    </div>
+</div>
+            <script>
+                function loadPartialView(viewName) {
+                    fetch(`/Member/LoadFavoriteRestaurants`)
+                        .then(response => response.text())
+                        .then(html => {
+                            document.getElementById('mainContent').innerHTML = html;
+                        });
+                }
+
+            </script>
 
     <script>
         function loadPartialView(viewName) {
             // 發送 AJAX 請求到 Controller 的 LoadPartialView 方法
-            fetch(`/Member/LoadPartialView?partialViewName=${viewName}`)
-                .then(response => {
-                    // 確保伺服器回應是成功的
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.text(); // 獲取回傳的 HTML
-                })
-                .then(html => {
-                    // 將回傳的 HTML 更新到 id="mainContent" 的區塊
-                    document.getElementById('mainContent').innerHTML = html;
-                })
-                .catch(error => {
-                    console.error('Error loading partial view:', error);
-                });
+        fetch(`/Member/LoadPartialView?partialViewName=${viewName}`)
+            .then(response => {
+                if (!response.ok) {
+                    // 顯示伺服器返回的錯誤訊息
+                    response.text().then(err => console.error('Error from server:', err));
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(html => {
+                document.getElementById('mainContent').innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error loading partial view:', error);
+            });
+
         }
     </script>
-
-</div>

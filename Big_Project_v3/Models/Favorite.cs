@@ -25,7 +25,10 @@ public partial class Favorite
     /// </summary>
     public DateTime? AddedAt { get; set; }
 
-    public virtual Restaurant? Restaurant { get; set; }
+    // 導航屬性
+    public virtual Restaurant Restaurant { get; set; }
 
     public virtual User? User { get; set; }
+
+
 }

@@ -9,5 +9,10 @@
         public int NumChildren { get; set; }
         public DateTime ReservationDate { get; set; }
         public TimeSpan ReservationTime { get; set; }
+
+        public string RestaurantName { get; set; } // 餐廳名稱
+        public string AddedAt { get; set; }        // 收藏日期
+        public string? PhotoUrl { get; set; }
+        public string PhotoType { get; set; }
     }
 }
