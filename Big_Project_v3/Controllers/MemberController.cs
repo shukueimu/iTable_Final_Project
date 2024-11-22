@@ -98,7 +98,8 @@ namespace Big_Project_v3.Controllers
                 // 如果使用者沒有訂位記錄，返回搜尋欄的部分視圖
                 if (!reservations.Any())
                 {
-                    return PartialView("PartialView/_SearchBar");
+                    //return PartialView("PartialView/_SearchBar");
+                    return Content("<h1>您目前沒有任何訂位記錄</h1>", "text/html");
                 }
 
                 // 傳回訂位記錄部分視圖

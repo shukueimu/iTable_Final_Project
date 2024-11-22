@@ -17,10 +17,16 @@
                             <div class="col-md-9">
                                 <!-- 訂位資訊 -->
                                 <h5 class="card-title">@reservation.Name</h5>
-                                <p class="text-success fw-bold">✔ 已確認訂位</p>
+                                @if (reservation.ReservationStatus == "已確認")
+                                {
+                                    <p class="text-success fw-bold">✔ @reservation.ReservationStatus 訂位</p>
+                                }else
+                                {
+                                    <p class="text-danger fw-bold">✘ @reservation.ReservationStatus 訂位</p>
+                                }
                                 <p class="mb-1">
-                                    <i class="bi bi-people"></i> 成人人數：@reservation.NumAdults<br />
-                                    <i class="bi bi-person"></i> 兒童人數：@reservation.NumChildren<br />
+                                    <i class="fas fa-user"></i> 成人人數：@reservation.NumAdults<br />
+                                    <i class="fas fa-child"></i> 兒童人數：@reservation.NumChildren<br />
                                     <i class="bi bi-calendar-event"></i> 日期：@reservation.ReservationDate.ToString("yyyy/MM/dd")<br />
                                     <i class="bi bi-clock"></i> 時間：@reservation.ReservationTime.ToString(@"hh\:mm")
                                 </p>
