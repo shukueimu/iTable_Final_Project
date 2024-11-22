@@ -87,6 +87,8 @@ namespace Big_Project_v3.Controllers
                 var reservations = await _context.Reservations
                     .Include(r => r.Restaurant) // 手動載入與餐廳的關聯資料
                     .Where(r => r.UserId == userId)
+                    .OrderByDescending(r => r.ReservationDate) // 第一排序條件：日期由近到遠
+                    .ThenByDescending(r => r.ReservationTime)  // 第二排序條件：時間由早到晚
                     .Select(r => new ReservationViewModel
                     {
                         RestaurantID = r.RestaurantId ?? 0,
@@ -94,6 +96,7 @@ namespace Big_Project_v3.Controllers
                         ReservationStatus = r.ReservationStatus,
                         NumAdults = r.NumAdults ?? 0,
                         NumChildren = r.NumChildren ?? 0,
+                        SpecialRequests = r.SpecialRequests,
                         ReservationDate = r.ReservationDate.HasValue
                             ? r.ReservationDate.Value.ToDateTime(TimeOnly.MinValue)
                             : DateTime.MinValue,
@@ -235,6 +238,7 @@ namespace Big_Project_v3.Controllers
 
             return Json(new { success = true, message = "已取消珍藏" }); // 成功取消
         }
+
 
 
 

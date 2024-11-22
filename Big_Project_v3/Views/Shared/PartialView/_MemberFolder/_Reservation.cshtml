@@ -16,7 +16,7 @@
                                 <img src="@reservation.PhotoUrl" alt="餐廳圖片" class="img-fluid rounded me-3" style="width: 200px; height: 200px">
                                 @if (reservation.ReservationStatus == "已完成")
                                 {
-                                    <button class="btn btn-primary my-1" style="width: 200px; height: 40px"
+                                    <button class="fw-bold img-fluid rounded me-3 btn btn-primary my-1" style="width: 200px; height: 40px"
                                     @* my-1調整上下間距 *@
                                             onclick="openAddCommentModal('@reservation.RestaurantID')">
                                         評論餐廳
