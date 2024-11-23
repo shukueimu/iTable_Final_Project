@@ -344,7 +344,71 @@ namespace Big_Project_v3.Controllers
             return Json(new { success = false, message = string.Join("; ", errors) });
         }
 
+        [HttpGet]
+        public async Task<IActionResult> EditComment(int reviewId)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (!userId.HasValue)
+            {
+                return Json(new { success = false, message = "使用者未登入" });
+            }
 
+            var review = await _context.Reviews.FirstOrDefaultAsync(r => r.ReviewId == reviewId && r.UserId == userId.Value);
+            if (review == null)
+            {
+                return Json(new { success = false, message = "找不到評論資料" });
+            }
+
+            var viewModel = new EditReviewViewModel
+            {
+                ReviewID = review.ReviewId,
+                RestaurantID = review.RestaurantId ?? 0,
+                Rating = review.Rating ?? 0,
+                ReviewText = review.ReviewText ?? string.Empty
+            };
+
+            return PartialView("~/Views/Shared/PartialView/_MemberFolder/_EditComment.cshtml", viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditComment([FromBody] EditReviewViewModel model)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (!userId.HasValue)
+            {
+                return Json(new { success = false, message = "使用者未登入" });
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var review = await _context.Reviews.FirstOrDefaultAsync(r => r.ReviewId == model.ReviewID && r.UserId == userId.Value);
+                    if (review == null)
+                    {
+                        return Json(new { success = false, message = "找不到評論資料" });
+                    }
+
+                    review.Rating = model.Rating;
+                    review.ReviewText = model.ReviewText;
+                    review.UpdatedAt = DateTime.Now;
+                    // IsReviewLocked 已經設置為 "不可改"，無需更改
+
+                    _context.Reviews.Update(review);
+                    await _context.SaveChangesAsync();
+
+                    return Json(new { success = true, message = "評論已更新" });
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error in EditComment: {ex.Message}");
+                    return Json(new { success = false, message = "評論更新失敗，請稍後再試。" });
+                }
+            }
+
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+            return Json(new { success = false, message = string.Join("; ", errors) });
+        }
 
 
         //    [HttpGet]

@@ -7,14 +7,14 @@
     }
 
     .star-rating {
-        direction: ltr; /* 保持星星從右到左排列 */
+        direction: ltr; /* 保持星星從左到右排列 */
         display: inline-flex; /* 使用 inline-flex 讓其保持水平排列且容器可調整位置 */
         font-size: 0;
     }
 
-        .star-rating input[type="radio"] {
-            display: none;
-        }
+    .star-rating input[type="radio"] {
+        display: none;
+    }
 
     .star-label {
         cursor: pointer;
@@ -25,32 +25,40 @@
     }
 
 
-        .star-rating svg {
-            width: 100%;
-            height: 100%;
-            fill: #80868b; /* 空心星的顏色 */
-            transition: fill 0.2s;
-        }
+    .star-rating svg {
+        width: 100%;
+        height: 100%;
+        fill: #80868b; /* 空心星的顏色 */
+        transition: fill 0.2s;
+    }
 
-        /* 當前選中及其右側的星星變亮 */
-        .star-rating label:hover ~ label svg,
-        .star-rating input[type="radio"]:checked ~ label svg {
-            fill: #fabb05; /* 亮星的顏色 */
-        }
+    /* 當前選中及其右側的星星變亮 */
+    .star-rating label:hover ~ label svg,
+    .star-rating input[type="radio"]:checked ~ label svg {
+        fill: #fabb05; /* 亮星的顏色 */
+    }
+
 
 </style>
 
-<div class="star-rating" aria-label="評分星等" role="radiogroup">
-    @for (var i = 1; i <= 5; i++)
+@{
+    var uniquePrefix = ViewBag.UniquePrefix ?? "";
+}
+
+<div class="star-rating">
+    @for (int i = 5; i >= 1; i--)
     {
-        <input type="radio" id="star-@i" name="Rating" value="@i" @(Model == i ? "checked" : "") aria-label="@i 星" />
-        <label for="star-@i" tabindex="0" class="star-label">
-            <svg viewBox="0 0 40 40" class="bi bi-star-fill text-warning">
-                <path d="M20 0 L24 14 H38 L27 23 L31 37 L20 28 L9 37 L13 23 L2 14 H16 L20 0 Z" />
+        <input type="radio" id="@($"star-{uniquePrefix}-{i}")" name="@($"Rating-{uniquePrefix}")" value="@i" @(Model == i ? "checked" : "") />
+        <label for="@($"star-{uniquePrefix}-{i}")" style="margin-right: 8px;">
+            <svg width="36" height="36" viewBox="0 0 24 24">
+                <!-- 星星圖示 -->
+               <path d="M12 .587l3.668 7.431L24 9.75l-6 5.847L19.335 24 12 19.897 4.665 24 6 15.597 0 9.75l8.332-1.732L12 .587z" />
+                @* <path d="M20 0 L24 14 H38 L27 23 L31 37 L20 28 L9 37 L13 23 L2 14 H16 L20 0 Z" /> *@
             </svg>
         </label>
     }
 </div>
+
 
 
 
