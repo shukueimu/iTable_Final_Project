@@ -15,5 +15,9 @@
         public string? PhotoUrl { get; set; }
         public string PhotoType { get; set; }
         public string SpecialRequests { get; set; }
+
+        // 新增的屬性
+        public int? ReviewID { get; set; }  // 新增的屬性來儲存 ReviewID
+        public string IsReviewLocked { get; set; } // "可新增"、"可修改"、"不可改"
     }
 }

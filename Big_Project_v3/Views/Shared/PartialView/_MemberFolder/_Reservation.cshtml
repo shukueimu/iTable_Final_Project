@@ -14,13 +14,14 @@
                         <div class="row">
                             <div class="col-md-3">
                                 <img src="@reservation.PhotoUrl" alt="餐廳圖片" class="img-fluid rounded me-3" style="width: 200px; height: 200px">
-                                @if (reservation.ReservationStatus == "已完成")
+                                @if (reservation.ReservationStatus == "已完成" && reservation.IsReviewLocked != "不可改")
                                 {
                                     @* my-1調整上下間距 *@
                                     <button class="fw-bold img-fluid rounded me-3 btn btn-primary my-1 add-comment-btn" style="width: 200px; height: 40px"
                                             data-restaurant-id="@reservation.RestaurantID">
                                         評論餐廳
                                     </button>
+                                    Console.WriteLine(reservation.IsReviewLocked);
                                 }
                             </div>
                             <div class="col-md-9">

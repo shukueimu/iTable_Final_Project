@@ -79,22 +79,12 @@
 <!-- 主視圖的 JavaScript 區塊 -->
  <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // 1. 定義全局的函數來加載收藏餐廳
-        window.loadFavoriteRestaurants = function () {
-            fetch(`/Member/LoadFavoriteRestaurants`)
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById('mainContent').innerHTML = html;
-                });
-        }
-
-        // 2. 加載局部視圖的函數
+        // 定義全局的函數來加載部分視圖
         window.loadPartialView = function (viewName) {
             fetch(`/Member/LoadPartialView?partialViewName=${viewName}`)
                 .then(response => {
                     if (!response.ok) {
-                        response.text().then(err => console.error('Error from server:', err));
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        return response.text().then(err => { throw new Error(err); });
                     }
                     return response.text();
                 })
@@ -106,7 +96,7 @@
                 });
         }
 
-        // 3. 定義收藏相關功能
+        // 定義收藏相關功能
         window.removeFavorite = function (RestaurantID) {
             if (RestaurantID === 0) {
                 console.error('無效的餐廳 ID，無法取消珍藏。');
@@ -127,7 +117,7 @@
                 });
         };
 
-        // 4. 打開新增評論的 Modal
+        // 打開新增評論的 Modal
         window.openAddCommentModal = function (RestaurantID) {
             if (RestaurantID === 0) {
                 console.error('無效的餐廳 ID，無法新增評論。');
@@ -141,6 +131,12 @@
                 success: function (response) {
                     $('#addCommentContent').html(response);
                     $('#addCommentModal').modal('show');
+
+                    // 初始化星級評分
+                    const starRatingContainer = document.querySelector('#addCommentModal .star-rating');
+                    if (starRatingContainer) {
+                        initializeStarRating(starRatingContainer);
+                    }
                 },
                 error: function (xhr) {
                     console.error('發生錯誤:', xhr.responseText);
@@ -149,7 +145,7 @@
             });
         };
 
-        // 5. 提交評論
+        // 提交評論
         window.submitComment = function () {
             const form = document.getElementById('addCommentForm');
             const selectedRating = form.querySelector('input[name="Rating"]:checked');
@@ -174,9 +170,14 @@
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(formData),
-                success: function () {
-                    $('#addCommentModal').modal('hide');
-                    loadPartialView('_FavoriteRestaurants');
+                success: function (response) {
+                    if (response.success) {
+                        $('#addCommentModal').modal('hide');
+                        loadPartialView('_Comment'); // 重新加載評論部分視圖
+                        alert(response.message); // 顯示成功訊息
+                    } else {
+                        alert(response.message); // 顯示失敗訊息
+                    }
                 },
                 error: function () {
                     alert('評論提交失敗，請稍後再試。');
@@ -184,7 +185,7 @@
             });
         };
 
-        // 6. 使用事件委託來處理按鈕的點擊事件
+        // 使用事件委託來處理按鈕的點擊事件
         document.body.addEventListener('click', function (event) {
             if (event.target.matches('.remove-favorite-btn')) {
                 const restaurantId = event.target.getAttribute('data-restaurant-id');
@@ -209,36 +210,35 @@
             }
         });
 
-        // 7. 星星評分互動改進
-        document.addEventListener('DOMContentLoaded', function () {
-            const starRatingContainer = document.querySelector('.star-rating');
-            const labels = document.querySelectorAll('.star-rating label');
+        // 1. 創建初始化星級評分的函數
+        window.initializeStarRating = function (container) {
+            const labels = container.querySelectorAll('label');
 
-            // 針對每顆星星分別綁定滑鼠進入和滑鼠移出事件
             labels.forEach((label, index) => {
                 // 當滑鼠移到某顆星星上方時，將所有前面的星星都亮起
                 label.addEventListener('mouseenter', function () {
-                    updateStarColors(index + 1); // 亮起從左到 index 的所有星星
+                    updateStarColors(container, index + 1); // 亮起從左到 index 的所有星星
                 });
 
                 // 當滑鼠移出時，恢復到原來的狀態
                 label.addEventListener('mouseleave', function () {
-                    const checkedStar = document.querySelector('.star-rating input[type="radio"]:checked');
+                    const checkedStar = container.querySelector('input[type="radio"]:checked');
                     if (checkedStar) {
-                        updateStarColors(parseInt(checkedStar.value)); // 恢復到選擇的評分
+                        updateStarColors(container, parseInt(checkedStar.value)); // 恢復到選擇的評分
                     } else {
-                        updateStarColors(0); // 沒有選擇的評分，全部暗色
+                        updateStarColors(container, 0); // 沒有選擇的評分，全部暗色
                     }
                 });
 
                 // 點擊星星時，將該星星及之前的星星亮起，並設置評分值
                 label.addEventListener('click', function () {
+                    // 更新所有星星的顏色
                     labels.forEach((l, i) => {
-                        l.querySelector('svg').style.fill = (i <= index) ? '#fabb05' : '#80868b';
+                        l.querySelector('svg').style.fill = (i < index + 1) ? '#fabb05' : '#80868b';
                     });
 
                     // 更新對應的 input radio 值以反映當前選擇
-                    const input = document.querySelector(`#star-${index + 1}`);
+                    const input = container.querySelector(`#star-${index + 1}`);
                     if (input) {
                         input.checked = true;
                     }
@@ -246,7 +246,8 @@
             });
 
             // 用於更新星星顏色的輔助函數
-            function updateStarColors(highlightedStars) {
+            function updateStarColors(container, highlightedStars) {
+                const labels = container.querySelectorAll('label');
                 labels.forEach((label, index) => {
                     if (index < highlightedStars) {
                         label.querySelector('svg').style.fill = '#fabb05'; // 亮起顏色
@@ -255,7 +256,6 @@
                     }
                 });
             }
-        });
-
+        }
     });
  </script>

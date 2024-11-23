@@ -53,6 +53,22 @@ namespace Big_Project_v3.Controllers
                                 .Where(p => p.RestaurantId == r.RestaurantId && p.PhotoType == "LOGO")
                                 .Select(p => p.PhotoUrl)
                                 .FirstOrDefault(),                  // 僅取第一張圖片
+
+                            // 查詢 ReviewID 和 IsReviewLocked，確保兩者對應同一條記錄
+                            ReviewID = _context.Reviews
+                                .Where(review => review.RestaurantId == r.RestaurantId && review.UserId == userId)
+                                .OrderByDescending(review => review.ReviewId) // 以 ReviewID 進行降序排序，獲取最新的評論
+                                .Select(review => review.ReviewId)
+                                .FirstOrDefault(),
+
+                            IsReviewLocked = _context.Reviews
+                           .Where(review => review.ReviewId == _context.Reviews
+                                .Where(innerReview => innerReview.RestaurantId == r.RestaurantId && innerReview.UserId == userId)
+                                .OrderByDescending(innerReview => innerReview.ReviewId)
+                                .Select(innerReview => innerReview.ReviewId)
+                                .FirstOrDefault())
+                    .Select(review => review.IsReviewLocked)
+                    .FirstOrDefault()
                         })
                         .ToList()
                 })
@@ -65,6 +81,7 @@ namespace Big_Project_v3.Controllers
             }
 
             return View(user);
+
         }
 
 
@@ -107,6 +124,22 @@ namespace Big_Project_v3.Controllers
                             .Where(p => p.RestaurantId == r.RestaurantId && p.PhotoType == "LOGO")
                             .Select(p => p.PhotoUrl)
                             .FirstOrDefault(),                  // 僅取第一張圖片
+
+                        // 查詢 ReviewID 和 IsReviewLocked，確保兩者對應同一條記錄
+                        ReviewID = _context.Reviews
+                                .Where(review => review.RestaurantId == r.RestaurantId && review.UserId == userId)
+                                .OrderByDescending(review => review.ReviewId) // 以 ReviewID 進行降序排序，獲取最新的評論
+                                .Select(review => review.ReviewId)
+                                .FirstOrDefault(),
+
+                        IsReviewLocked = _context.Reviews
+                           .Where(review => review.ReviewId == _context.Reviews
+                                .Where(innerReview => innerReview.RestaurantId == r.RestaurantId && innerReview.UserId == userId)
+                                .OrderByDescending(innerReview => innerReview.ReviewId)
+                                .Select(innerReview => innerReview.ReviewId)
+                                .FirstOrDefault())
+                    .Select(review => review.IsReviewLocked)
+                    .FirstOrDefault()
                     })
                     .ToListAsync();
 
@@ -249,12 +282,11 @@ namespace Big_Project_v3.Controllers
                     return BadRequest("無效的餐廳 ID");
                 }
 
-                var viewModel = new ReviewViewModel
+                var viewModel = new CreateReviewViewModel
                 {
                     RestaurantID = restaurantId,
                     Rating = 0.0, // 預設為 0.0
-                    ReviewText = string.Empty, // 預設為空字串
-                    ReviewDate = DateTime.Now
+                    ReviewText = string.Empty // 預設為空字串
                 };
 
                 // 返回 Shared 文件夾中的部分視圖
@@ -268,50 +300,51 @@ namespace Big_Project_v3.Controllers
             }
         }
 
+
         // SubmitComment 方法
         [HttpPost]
-        public async Task<IActionResult> SubmitComment([FromBody] ReviewViewModel model)
+        public async Task<IActionResult> SubmitComment([FromBody] CreateReviewViewModel model)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
 
             if (!userId.HasValue)
             {
-                return Json(new { success = false, message = "使用者未登入" }); // 未登入
+                return Json(new { success = false, message = "使用者未登入" });
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // 新增評論至資料庫
                     var review = new Review
                     {
-                        UserId = userId.Value, // 假設使用者已登入，獲取 UserID
-                        RestaurantId = model.RestaurantID, // 餐廳 ID
-                        Rating = model.Rating, // 評分 (double)
-                        ReviewText = model.ReviewText, // 評論文字
-                        ReviewDate = DateOnly.FromDateTime(DateTime.Now), // 將 DateTime 轉換為 DateOnly
-                        CreatedAt = DateTime.Now, // 設定建立時間
-                        UpdatedAt = DateTime.Now // 設定更新時間
+                        UserId = userId.Value,
+                        RestaurantId = model.RestaurantID,
+                        Rating = model.Rating,
+                        ReviewText = model.ReviewText,
+                        ReviewDate = DateOnly.FromDateTime(DateTime.Now),
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now,
+                        IsReviewLocked = "不可改" // 設置為 "不可改"
                     };
 
-                    _context.Reviews.Add(review); // 加入資料庫
+                    _context.Reviews.Add(review);
                     await _context.SaveChangesAsync();
 
-                    return Json(new { success = true, message = "評論已送出" }); // 回傳成功狀態
+                    return Json(new { success = true, message = "評論已送出" });
                 }
                 catch (Exception ex)
                 {
-                    // 錯誤日誌
                     Console.WriteLine($"Error in SubmitComment: {ex.Message}");
                     return Json(new { success = false, message = "評論提交失敗，請稍後再試。" });
                 }
             }
 
-            // 如果模型驗證失敗
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
             return Json(new { success = false, message = string.Join("; ", errors) });
         }
+
+
 
 
         //    [HttpGet]
