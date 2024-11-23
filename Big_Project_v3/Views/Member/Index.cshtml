@@ -272,7 +272,32 @@
             });
         };
 
-        // 7. 使用事件委託來處理按鈕的點擊事件
+        // 7. 刪除評論的函數
+        window.deleteComment = function (ReviewID) {
+            if (!confirm('確定要刪除這條評論嗎？')) {
+                return;
+            }
+
+            $.ajax({
+                url: '/Member/DeleteComment',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(ReviewID),
+                success: function (response) {
+                    if (response.success) {
+                        alert(response.message);
+                        loadPartialView('_Comment'); // 重新加載評論部分視圖
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function () {
+                    alert('評論刪除失敗，請稍後再試。');
+                }
+            });
+        };
+
+        // 8. 使用事件委託來處理按鈕的點擊事件
         document.body.addEventListener('click', function (event) {
             if (event.target.matches('.remove-favorite-btn')) {
                 const restaurantId = event.target.getAttribute('data-restaurant-id');
@@ -301,9 +326,19 @@
                 }
             }
 
+            if (event.target.matches('.delete-comment-btn')) {
+                const reviewId = event.target.getAttribute('data-review-id');
+                if (reviewId) {
+                    deleteComment(parseInt(reviewId, 10));
+                } else {
+                    console.error('無效的評論 ID');
+                }
+            }
+
             if (event.target.matches('#submitCommentBtn')) {
                 submitComment();
             }
         });
     });
  </script>
+
