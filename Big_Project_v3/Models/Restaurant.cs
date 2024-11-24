@@ -74,6 +74,29 @@ public partial class Restaurant
 
     public string? PriceRange { get; set; }
 
+    //設定價格區間-子欣
+    public (string Symbol, string Description) GetPriceRange()
+    {
+        // 若 PriceRange 為 null，直接回傳預設值
+        if (string.IsNullOrEmpty(PriceRange))
+            return ("N/A", "未知價格區間");
+
+        // 移除非數字符號，並嘗試轉換為數值
+        string cleanPrice = new string(PriceRange.Where(char.IsDigit).ToArray());
+        if (decimal.TryParse(cleanPrice, out decimal price))
+        {
+            if (price < 500)
+                return ("$", "$ 0-500");
+            if (price < 1000)
+                return ("$$", "$$ 500-1000");
+            if (price < 1500)
+                return ("$$$", "$$$ 1000-1500");
+            return ("$$$$", "$$$$ 1500以上");
+        }
+        // 如果無法轉換，回傳預設值
+        return ("N/A", "未知價格區間");
+    }
+
     public virtual ICollection<Announcement> Announcements { get; set; } = new List<Announcement>();
 
     public virtual ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();

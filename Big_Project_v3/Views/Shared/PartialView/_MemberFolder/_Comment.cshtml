@@ -12,7 +12,9 @@
                         <!-- 餐廳圖片 -->
                         <div class="row">
                             <div class="col-md-3 d-flex flex-column align-items-center">
-                                <img src="@review.PhotoURL" alt="@review.RestaurantName" class="img-fluid rounded mb-3" style="width: 200px; height: 200px;">
+                                <a asp-controller="Restaurant" asp-action="Index" asp-route-id="@review.RestaurantID">
+                                    <img src="@review.PhotoURL" alt="@review.RestaurantName" class="img-fluid rounded mb-3" style="width: 200px; height: 200px;">
+                                </a>
 
                                 <!-- 修改評論按鈕 -->
                                 @if (review.IsReviewLocked != "不可改")
@@ -23,7 +25,9 @@
 
                             <div class="col-md-9 d-flex flex-column justify-content-center align-items-md-start align-items-center text-center text-md-start">
                                 <!-- 餐廳評論資訊 -->
-                                <h4 class="fw-bolder card-title">@review.RestaurantName</h4>
+                                <a asp-controller="Restaurant" asp-action="Index" asp-route-id="@review.RestaurantID" class="text-decoration-none">
+                                    <h4 class="fw-bolder card-title">@review.RestaurantName</h4>
+                                </a>
                                 <p class="card-text"><small class="text-muted">@review.ReviewDate.ToString("yyyy/MM/dd")</small></p>
                                 <strong class="card-text">你的評論：@review.ReviewText</strong>
                                 <p></p>
