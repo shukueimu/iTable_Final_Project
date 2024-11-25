@@ -119,5 +119,83 @@ namespace Big_Project_v3.Controllers
             }
         }
 
+        [HttpGet]
+        public IActionResult GetReviews(int id, int page = 1)
+        {
+            int pageSize = 5; // 每頁顯示的評論數量
+
+            // 從資料庫中獲取餐廳資訊和相關資料
+            var restaurant = _context.Restaurants
+                .Include(r => r.Photos)
+                .Include(r => r.Announcements)
+                .Include(r => r.Reviews)
+                    .ThenInclude(r => r.User)
+                .FirstOrDefault(r => r.RestaurantId == id);
+
+            if (restaurant == null)
+            {
+                return NotFound();
+            }
+
+            // 獲取主要照片（MainPhoto），假設類型為 Photo
+            var mainPhoto = restaurant.Photos.FirstOrDefault(p => p.PhotoType == "MainPhoto");
+            if (mainPhoto == null)
+            {
+                // 如果沒有主要照片，您可以創建一個默認的 Photo 實例或處理此情況
+                mainPhoto = new Photo { /* 設置默認值 */ };
+            }
+
+            // 獲取環境照片列表（EnvironmentPhotos）
+            var environmentPhotos = restaurant.Photos.Where(p => p.PhotoType == "EnvironmentPhoto").ToList();
+
+            // 獲取菜單照片（MenuPhoto）
+            var menuPhoto = restaurant.Photos.FirstOrDefault(p => p.PhotoType == "MenuPhoto");
+            if (menuPhoto == null)
+            {
+                // 如果沒有菜單照片，創建默認值或處理此情況
+                menuPhoto = new Photo { /* 設置默認值 */ };
+            }
+
+            // 獲取公告內容，將公告內容分段
+            var announcementParagraphs = restaurant.Announcements
+                .OrderByDescending(a => a.CreatedAt)
+                .Select(a => a.Content)
+                .ToList();
+
+            // 獲取總評論數量
+            var totalReviews = restaurant.Reviews.Count();
+
+            // 計算總頁數
+            int totalPages = (int)Math.Ceiling((double)totalReviews / pageSize);
+
+            // 確保頁碼在有效範圍內
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+
+            // 根據頁碼和每頁大小取得當前頁面的評論
+            var reviews = restaurant.Reviews
+                .OrderByDescending(r => r.ReviewDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            // 構建視圖模型，為所有 required 屬性提供值
+            var model = new RestaurantViewModel
+            {
+                Restaurant = restaurant,
+                MainPhoto = mainPhoto,
+                EnvironmentPhotos = environmentPhotos,
+                MenuPhoto = menuPhoto,
+                AnnouncementParagraphs = announcementParagraphs,
+                Reviews = reviews,
+                CurrentPage = page,
+                TotalPages = totalPages,
+                RestaurantId = id,
+                // 如果有需要，可以設置 IsFavorite
+            };
+
+            return PartialView("_ReviewsPartial", model);
+        }
+
     }
 }
