@@ -1,6 +1,15 @@
 ﻿@model Big_Project_v3.ViewModels.RestaurantViewModel
 
 @* 橫幅首圖 *@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    @* <title>我的網頁</title> *@
+    <!-- 其他頭部內容，例如樣式檔 -->
+</head>
+
 <div class="position-relative">
     <img src="@Model.MainPhoto.PhotoUrl" id="firstImg" />
 </div>
@@ -40,9 +49,15 @@
                         <h2 id="scrollspyHeading1" class="fw-bolder"> @Model.Restaurant.Name </h2>
                     </div>
                     <!-- 使用 Bootstrap Icons 作為收藏圖示 -->
-                    <button class="btn btn-primary favorite position-absolute top-0 end-0 m-2">
-                        <i class="bi bi-heart"></i>
+                    <button class="btn btn-primary favorite position-absolute top-0 end-0 m-2
+                 @(Model.IsFavorite ? "favorite_active" : "")"
+                            data-restaurant-id="@Model.Restaurant.RestaurantId">
+                        <!-- 根據收藏狀態選擇心形圖示 -->
+                        <i class="bi bi-heart@(Model.IsFavorite ? "-fill" : "")"></i>
+                        <span class="favorite-text">收藏</span>
                     </button>
+                    @Html.AntiForgeryToken() <!-- 防止 CSRF 攻擊 -->
+
                     <div>
                         <div>
                             @* 星星評論 *@

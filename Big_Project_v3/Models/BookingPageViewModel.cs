@@ -1,4 +1,6 @@
-﻿namespace Big_Project_v3.Models
+﻿using Big_Project_v3.ViewModels;
+
+namespace Big_Project_v3.Models
 {
     public class BookingPageViewModel
     {
@@ -10,12 +12,15 @@
         public List<RestaurantAvailability>? RestaurantAvailabilities { get; set; }
         //public List<RestaurantBusinessHour>? RestaurantBusinessHours { get; set; }
         public List<RestaurantUser>? RestaurantUsers { get; set; }
-        public List<Review>? Reviews { get; set; }
+        public List<ReviewViewModel> Reviews { get; set; } = new List<ReviewViewModel>();
         public List<User>? Users { get; set; }
         public List<Photo>? Photos { get; set; }
         public List<PasswordResetRequest>? PasswordResetRequests { get; set; }
 
-        // 新增 UserId 屬性
+
+        // 新增 UserID 屬性
         public int? UserId { get; set; }
+        // 新增 PhotoUrl 屬性
+        public string? PhotoUrl { get; set; }
     }
 }

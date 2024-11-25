@@ -43,6 +43,17 @@
     border: aliceblue;
 }
 
+/* 去除按鈕點擊後的外框 */
+.favorite:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+#toggleButton {
+    color: #A12819;
+    font-weight: bolder;
+}
+
 section {
     border: solid 1px;
     border-color: #E0E0E0;

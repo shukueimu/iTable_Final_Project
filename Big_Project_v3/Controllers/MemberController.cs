@@ -38,7 +38,7 @@ namespace Big_Project_v3.Controllers
                         .Select(r => new ReservationViewModel
                         {
                             Name = r.Restaurant != null ? r.Restaurant.Name : "未知餐廳",
-                            RestaurantID = r.RestaurantId ?? 0,
+                            RestaurantID = r.RestaurantId,
                             ReservationStatus = r.ReservationStatus,
                             NumAdults = r.NumAdults ?? 0,
                             NumChildren = r.NumChildren ?? 0,
@@ -108,7 +108,7 @@ namespace Big_Project_v3.Controllers
                     .ThenByDescending(r => r.ReservationTime)  // 第二排序條件：時間由早到晚
                     .Select(r => new ReservationViewModel
                     {
-                        RestaurantID = r.RestaurantId ?? 0,
+                        RestaurantID = r.RestaurantId,
                         Name = r.Restaurant != null ? r.Restaurant.Name : "未知餐廳",
                         ReservationStatus = r.ReservationStatus,
                         NumAdults = r.NumAdults ?? 0,

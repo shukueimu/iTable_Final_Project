@@ -11,25 +11,31 @@ namespace Big_Project_v3.Controllers
     public class RestaurantController : Controller
     {
         private readonly ITableDbContext _context;
-        private const int PageSize = 2; // 每頁顯示的評論數量
+        private const int PageSize = 2;
+
         public RestaurantController(ITableDbContext context)
         {
             _context = context;
         }
 
-        public async Task<IActionResult> Index(int id, int? page)
+        public async Task<IActionResult> Index(int Id, int? page)
         {
+            var userId = HttpContext.Session.GetInt32("UserId");
+
             var restaurant = await _context.Restaurants
-                .Include(r => r.Announcements)                         //串公告
-                .Include(r => r.Reviews).ThenInclude(rw => rw.User)    //串評論
-                .Include(r => r.Favorites).ThenInclude(f => f.User)    //串收藏
-                .Include(r => r.Photos)                                //串照片
-                .FirstOrDefaultAsync(m => m.RestaurantId == id); 
+                .Include(r => r.Announcements)
+                .Include(r => r.Reviews).ThenInclude(rw => rw.User)
+                .Include(r => r.Favorites).ThenInclude(f => f.User)
+                .Include(r => r.Photos)
+                .FirstOrDefaultAsync(m => m.RestaurantId == Id);
 
             if (restaurant == null)
             {
                 return NotFound();
             }
+
+            var isFavorite = userId.HasValue && await _context.Favorites
+                .AnyAsync(f => f.UserId == userId && f.RestaurantId == Id);
 
             var announcementContent = restaurant.Announcements.FirstOrDefault()?.Content ?? string.Empty;
             var announcementParagraphs = new List<string>();
@@ -59,6 +65,7 @@ namespace Big_Project_v3.Controllers
                      ?? new Photo { PhotoUrl = "https://inline.app/get-printed-menus?cid=-LARHRYjmf_PDvmeH_2U&bid=-LARHRYjmf_PDvmeH_2V" },
                 AnnouncementParagraphs = announcementParagraphs,
                 Reviews = reviews,
+                IsFavorite = isFavorite,  // 判斷使用者是否已收藏
                 CurrentPage = currentPage,
                 TotalPages = (int)Math.Ceiling(totalReviews / (double)PageSize)
             };
@@ -69,60 +76,48 @@ namespace Big_Project_v3.Controllers
             return View(viewModel);
         }
 
-        public async Task<IActionResult> GetReviews(int id, int? page)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleFavorite([FromBody] int Id)
         {
-            var restaurant = await _context.Restaurants
-                .Include(r => r.Reviews).ThenInclude(rw => rw.User)
-                .FirstOrDefaultAsync(m => m.RestaurantId == id);
-
-            if (restaurant == null)
+            // 取得登入用戶的 ID
+            var userId = HttpContext.Session.GetInt32("UserId");  // 從 Session 中取得 userId
+            if (!userId.HasValue)
             {
-                return NotFound();
+                return Json(new { success = false, message = "請先登入會員" });  // 如果未登入
             }
 
-            int currentPage = page ?? 1;
-            var reviews = restaurant.Reviews
-                .OrderByDescending(r => r.ReviewDate)
-                .Skip((currentPage - 1) * PageSize)
-                .Take(PageSize)
-                .ToList();
-
-            var viewModel = new RestaurantViewModel
+            var user = await _context.Users.FindAsync(userId.Value);
+            if (user == null)
             {
-                Restaurant = restaurant,
-                MainPhoto = restaurant.Photos.FirstOrDefault(p => p.PhotoType == "首圖")
-                     ?? new Photo { PhotoUrl = "https://via.placeholder.com/1200x400?text=No+Image+Available" },
-                EnvironmentPhotos = restaurant.Photos.Where(p => p.PhotoType == "餐廳環境").ToList(),
-                MenuPhoto = restaurant.Photos.FirstOrDefault(p => p.PhotoType == "菜單")
-                     ?? new Photo { PhotoUrl = "https://inline.app/get-printed-menus?cid=-LARHRYjmf_PDvmeH_2U&bid=-LARHRYjmf_PDvmeH_2V" },
-                AnnouncementParagraphs = new List<string>(),  // 初始化為空列表
-                Reviews = reviews,
-                CurrentPage = currentPage,
-                TotalPages = (int)Math.Ceiling(restaurant.Reviews.Count() / (double)PageSize)
-            };
+                return Json(new { success = false, message = "使用者不存在" });
+            }
 
-            return PartialView("_ReviewsPartial", viewModel);
-        }
+            // 檢查該使用者是否已經收藏該餐廳
+            var existingFavorite = await _context.Favorites
+                .FirstOrDefaultAsync(f => f.UserId == user.UserId && f.RestaurantId == Id);
 
-        [HttpPost]
-        public async Task<IActionResult> AddFavorite(int userId, int restaurantId) 
-        { 
-            var favorite = new Favorite 
-            { 
-                UserId = userId, RestaurantId = restaurantId, AddedAt = DateTime.Now
-            };
-            _context.Favorites.Add(favorite); 
-            await _context.SaveChangesAsync(); 
-            return Ok(new { success = true }); }
-
-        [HttpPost] 
-        public async Task<IActionResult> RemoveFavorite(int userId, int restaurantId) {
-            var favorite = await _context.Favorites.FirstOrDefaultAsync(f => f.UserId == userId && f.RestaurantId == restaurantId); 
-            if (favorite != null) { _context.Favorites.Remove(favorite);
+            if (existingFavorite != null)
+            {
+                // 移除收藏
+                _context.Favorites.Remove(existingFavorite);
                 await _context.SaveChangesAsync();
-                return Ok(new { success = true }); 
-            } 
-            return BadRequest(new { success = false }); 
+                return Json(new { success = true, isFavorite = false });
+            }
+            else
+            {
+                // 新增收藏
+                var newFavorite = new Favorite
+                {
+                    UserId = user.UserId,
+                    RestaurantId = Id,
+                    AddedAt = DateTime.Now
+                };
+                _context.Favorites.Add(newFavorite);
+                await _context.SaveChangesAsync();
+                return Json(new { success = true, isFavorite = true });
+            }
         }
+
     }
 }

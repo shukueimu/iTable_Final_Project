@@ -45,7 +45,7 @@ public partial class Review
     /// </summary>
     public DateTime? UpdatedAt { get; set; }
 
-    public string IsReviewLocked { get; set; } // 新增欄位
+    public string? IsReviewLocked { get; set; } // 新增欄位
 
     public virtual Restaurant? Restaurant { get; set; }
 

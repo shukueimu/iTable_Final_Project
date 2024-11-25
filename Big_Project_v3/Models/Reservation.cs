@@ -13,7 +13,7 @@ public partial class Reservation
     /// <summary>
     /// 餐廳ID，外鍵（FK）連結到 Restaurants 表（前台 + 後台）。此欄位指定訂位所屬的餐廳。
     /// </summary>
-    public int? RestaurantId { get; set; }
+    public int RestaurantId { get; set; }
 
     /// <summary>
     /// 使用者ID，外鍵（FK）連結到 Users 表（前台 + 後台）。此欄位指定訂位的使用者。

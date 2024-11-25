@@ -11,8 +11,10 @@ namespace Big_Project_v3.ViewModels
         public required List<string> AnnouncementParagraphs { get; set; }  // 分段公告
 
         public required List<Review> Reviews { get; set; }
+        public bool IsFavorite { get; set; } // 用來判斷是否已收藏
         public int CurrentPage { get; set; }
         public int TotalPages { get; set; }
+
 
     }
 }

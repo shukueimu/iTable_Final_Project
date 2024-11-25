@@ -1,8 +1,5 @@
 ﻿@model LoginViewModel
 
-@{
-    ViewData["Title"] = "會員登入";
-}
 <form asp-action="Login" method="post">
     <div class="container">
         <div class="row justify-content-center">
@@ -29,7 +26,22 @@
                     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
                     <div class="text-center">
-                        <button type="submit" class="btn btn-lg btn-primary">登入</button>
+                        <button type="submit" class="btn btn-lg" style="background-color: #D25823; color: white; border: none;"
+                                onmouseover="this.style.backgroundColor='#C53F0F'"
+                                onmouseout="this.style.backgroundColor='#D25823'">
+                            登入
+                        </button>
+                    </div>
+
+
+                    <!-- 註冊連結 -->
+                    <div class="text-center mt-3">
+                        <p>
+                            尚未註冊iTable會員?
+                            <a asp-controller="User" asp-action="Create" class="text-primary text-decoration-underline">
+                                立即註冊
+                            </a>
+                        </p>
                     </div>
                 </fieldset>
             </div>
@@ -39,7 +51,7 @@
 
 <!-- JavaScript for password toggle -->
 <script>
-    document.getElementById('eyeIcon').addEventListener('click', function() {
+    document.getElementById('eyeIcon').addEventListener('click', function () {
         var passwordField = document.getElementById('PasswordHash');
         var icon = document.getElementById('eyeIcon');
 
