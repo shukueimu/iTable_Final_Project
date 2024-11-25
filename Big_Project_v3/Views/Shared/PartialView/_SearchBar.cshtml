@@ -82,7 +82,10 @@
                     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
                     <!-- 引入 Axios 庫，確保可以使用 axios -->
 
-                    <button id="searchButton" type="button" onclick="searchRestaurants()" class="btn btn-danger w-50">尋找餐廳</button>
+                    <button id="searchButton" type="button" onclick="searchRestaurants()" class="btn btn-danger w-50" style="display: block; margin-left: auto; margin-right: auto;">尋找餐廳</button>
+
+
+
                 </form>
                 @* 搜尋按鈕的方法與邏輯 *@
                 <script>
@@ -143,6 +146,7 @@
                         <button class="btn btn-outline-primary me-2" onclick="sortByRating()">評分高低</button>
                         <button id="sortByDistanceButton" class="btn btn-outline-primary">距離遠近</button>
                     </div>
+
                     <script>
                         function sortByRating() {
                             const selectedDistricts = [];
@@ -183,6 +187,7 @@
                         </p>
                         <p id="locationSection"></p>
                     </div>
+
 
                     <script>
                         // 台中市 29 區的經緯度範圍

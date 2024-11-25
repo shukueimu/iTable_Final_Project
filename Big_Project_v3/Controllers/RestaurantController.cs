@@ -122,7 +122,7 @@ namespace Big_Project_v3.Controllers
         [HttpGet]
         public IActionResult GetReviews(int id, int page = 1)
         {
-            int pageSize = 5; // 每頁顯示的評論數量
+            int pageSize = 2; // 每頁顯示的評論數量
 
             // 從資料庫中獲取餐廳資訊和相關資料
             var restaurant = _context.Restaurants

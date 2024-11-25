@@ -176,49 +176,51 @@ namespace Big_Project_v3.Controllers
         }
 
 
-        [HttpPost]
-        public IActionResult FilterByDistrict([FromBody] List<string> selectedDistricts)
-        {
-            if (selectedDistricts == null || !selectedDistricts.Any())
-            {
-                // 如果未選擇任何地區，返回空的部分視圖
-                return PartialView("PartialView/_SearchRestaurantFolder/_SearchDistrictEmpty");
-            }
+		[HttpPost]
+		public IActionResult FilterByDistrict([FromBody] List<string> selectedDistricts)
+		{
+			List<Restaurant> filteredRestaurants;
 
-            // 測試輸出接收到的地區
-            Console.WriteLine("接收到的地區名稱: " + string.Join(", ", selectedDistricts));
+			if (selectedDistricts == null || !selectedDistricts.Any())
+			{
+				// 如果未選擇任何地區，返回所有餐廳
+				filteredRestaurants = _context.Restaurants.ToList();
+			}
+			else
+			{
+				// 篩選餐廳地址包含地區名稱的餐廳
+				filteredRestaurants = _context.Restaurants
+					.Where(r => selectedDistricts.Any(d => r.Address != null && r.Address.Contains(d))) // 篩選條件
+					.ToList();
+			}
 
-            // 篩選餐廳地址包含地區名稱的餐廳
-            var filteredRestaurants = _context.Restaurants
-                .Where(r => selectedDistricts.Any(d => r.Address != null && r.Address.Contains(d))) // 篩選條件
-                .ToList();
+			// 在後端 FilterByDistrict 中加入測試輸出
+			Console.WriteLine("返回的 JSON 資料: ");
+			foreach (var restaurant in filteredRestaurants)
+			{
+				Console.WriteLine($"Name: {restaurant.Name}, Address: {restaurant.Address}");
+			}
 
-            //在後端 FilterByDistrict 中加入測試輸出
-            Console.WriteLine("返回的 JSON 資料: ");
-            foreach (var restaurant in filteredRestaurants)
-            {
-                Console.WriteLine($"Name: {restaurant.Name}, Address: {restaurant.Address}");
-            }
+			// 測試輸出篩選結果
+			Console.WriteLine("符合篩選條件的餐廳數量: " + filteredRestaurants.Count);
+			foreach (var restaurant in filteredRestaurants)
+			{
+				Console.WriteLine($"餐廳名稱: {restaurant.Name}, 地址: {restaurant.Address}");
+			}
 
-            // 測試輸出篩選結果
-            Console.WriteLine("符合篩選條件的餐廳數量: " + filteredRestaurants.Count);
-            foreach (var restaurant in filteredRestaurants)
-            {
-                Console.WriteLine($"餐廳名稱: {restaurant.Name}, 地址: {restaurant.Address}");
-            }
+			// 如果沒有符合條件的餐廳，返回提示
+			if (!filteredRestaurants.Any())
+			{
+				// 如果沒有匹配的結果，返回空部分視圖
+				return PartialView("PartialView/_SearchRestaurantFolder/_SearchDistrictEmpty");
+			}
 
-            // 如果沒有符合條件的餐廳，返回提示
-            if (!filteredRestaurants.Any())
-            {
-                // 如果沒有匹配的結果，返回空部分視圖
-                return PartialView("PartialView/_SearchRestaurantFolder/_SearchDistrictEmpty");
-            }
+			// 返回篩選結果，渲染為部分視圖
+			return PartialView("PartialView/_SearchRestaurantFolder/_SearchDistrict", filteredRestaurants);
+		}
 
-            // 返回篩選結果，渲染為部分視圖
-            return PartialView("PartialView/_SearchRestaurantFolder/_SearchDistrict", filteredRestaurants);
-        }
 
-        [HttpPost]
+		[HttpPost]
         public IActionResult SortRestaurantsByLocation([FromBody] LocationViewModel userLocation)
         {
             double userLat = userLocation.Latitude;
@@ -239,7 +241,8 @@ namespace Big_Project_v3.Controllers
                     AverageRating = r.AverageRating ?? 0,
                     Latitude = ExtractCoordinates(r.GoogleMapAddress).Latitude,
                     Longitude = ExtractCoordinates(r.GoogleMapAddress).Longitude,
-                })
+					IsReservationOpen = r.IsReservationOpen // 設置此屬性
+				})
                 .ToList();
 
             // 按距離或名稱排序
@@ -336,6 +339,7 @@ namespace Big_Project_v3.Controllers
                     Latitude = ExtractCoordinates(r.GoogleMapAddress).Latitude,
                     Longitude = ExtractCoordinates(r.GoogleMapAddress).Longitude,
                     SearchKeyword = priceRange, // 儲存篩選條件
+                    IsReservationOpen = r.IsReservationOpen // 設置此屬性
                 })
                 .ToList();
 

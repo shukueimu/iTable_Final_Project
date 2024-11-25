@@ -50,6 +50,7 @@
 
     @foreach (var restaurant in Model.Restaurants)
     {
+      <a href="@Url.Action("Index", "Restaurant", new { id = restaurant.RestaurantId })" class="text-decoration-none text-dark">
         <div class="restaurant-item d-flex mb-3">
             <!-- d-flex: 使用 Flexbox 讓內容水平排列
                  mb-3: 設定底部外距為 3（相當於 1rem） -->
@@ -60,6 +61,13 @@
 
             <div>
                 <h6 class="text-primary">@restaurant.Name</h6>
+
+                    <!-- 判斷餐廳是否接受訂單 -->
+                    @if (!restaurant.IsReservationOpen)
+                    {
+                        <p class="text-danger">此餐廳暫時無法接受訂單。</p>
+                    }
+
                 <!-- text-primary: 設定文字顏色為主要顏色 -->
                 @await Html.PartialAsync("PartialView/_SearchRestaurantFolder/StarRating_BootStrap", restaurant.AverageRating)
                 @restaurant.Description
@@ -75,5 +83,6 @@
             </div>
         </div>
         <hr />
+      </a>
     }
 </div>
