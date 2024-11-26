@@ -112,46 +112,46 @@ namespace Big_Project_v3.Controllers
             return View();
         }
 
-    // POST: User/Edit/5
-    //[HttpPost]
-    //[ValidateAntiForgeryToken]
-    //public async Task<IActionResult> Edit(int id, [Bind("UserId,UserName,Name,ContactPhone,ContactEmail,CreatedAt,UpdatedAt")] User user)
-    //{
-    //    if (id != user.UserId)
-    //    {
-    //        return NotFound();
-    //    }
+        // POST: User/Edit/5
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Edit(int id, [Bind("UserId,UserName,Name,ContactPhone,ContactEmail,CreatedAt,UpdatedAt")] User user)
+        //{
+        //    if (id != user.UserId)
+        //    {
+        //        return NotFound();
+        //    }
 
-    //    if (ModelState.IsValid)
-    //    {
-    //        try
-    //        {
-    //            // 更新 UpdatedAt 時間
-    //            user.UpdatedAt = DateTime.Now;
+        //    if (ModelState.IsValid)
+        //    {
+        //        try
+        //        {
+        //            // 更新 UpdatedAt 時間
+        //            user.UpdatedAt = DateTime.Now;
 
-    //            // 更新使用者資料
-    //            _context.Update(user);
-    //            await _context.SaveChangesAsync();
-    //        }
-    //        catch (DbUpdateConcurrencyException)
-    //        {
-    //            if (!UserExists(user.UserId))
-    //            {
-    //                return NotFound();
-    //            }
-    //            else
-    //            {
-    //                throw;
-    //            }
-    //        }
-    //        // 更新成功後返回到會員資料頁面或其他頁面
-    //        return RedirectToAction(nameof(Index));
-    //    }
-    //    return View(user);
-    //}
+        //            // 更新使用者資料
+        //            _context.Update(user);
+        //            await _context.SaveChangesAsync();
+        //        }
+        //        catch (DbUpdateConcurrencyException)
+        //        {
+        //            if (!UserExists(user.UserId))
+        //            {
+        //                return NotFound();
+        //            }
+        //            else
+        //            {
+        //                throw;
+        //            }
+        //        }
+        //        // 更新成功後返回到會員資料頁面或其他頁面
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    return View(user);
+        //}
 
-    // GET: User/Delete/5---------------------------------------------
-    public async Task<IActionResult> Delete(int? id)
+        // GET: User/Delete/5---------------------------------------------
+        public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
@@ -242,14 +242,14 @@ namespace Big_Project_v3.Controllers
         public IActionResult EditProfile()
         {
             // 顯示使用者資料
-            var UserId = HttpContext.Session.GetInt32("UserId");
+            var userId = HttpContext.Session.GetInt32("UserId");
 
-            if (UserId == null)
+            if (userId == null)
             {
                 return RedirectToAction("Login");
             }
 
-            var existingUser = _context.Users.FirstOrDefault(u => u.UserId == UserId);
+            var existingUser = _context.Users.FirstOrDefault(u => u.UserId == userId);
             if (existingUser == null)
             {
                 return NotFound();
@@ -263,9 +263,9 @@ namespace Big_Project_v3.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditProfile([Bind("UserId, UserName, Name, ContactPhone, ContactEmail, PasswordHash, CreatedAt, UpdatedAt")] User user)
         {
-            var UserId = user.UserId;
+            var userId = user.UserId;
 
-            if (UserId == 0)
+            if (userId == 0)
             {
                 return RedirectToAction("Login");
             }
@@ -274,7 +274,7 @@ namespace Big_Project_v3.Controllers
             {
                 try
                 {
-                    var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.UserId == UserId);
+                    var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
                     if (existingUser == null)
                     {
                         return NotFound();
@@ -312,8 +312,8 @@ namespace Big_Project_v3.Controllers
         public IActionResult GetLoginStatus()
         {
             // 檢查 Session 中是否有 UserId，若有則表示已登入
-            var UserId = HttpContext.Session.GetInt32("UserId");
-            bool isLoggedIn = UserId.HasValue;
+            var userId = HttpContext.Session.GetInt32("UserId");
+            bool isLoggedIn = userId.HasValue;
 
             // 傳遞登入狀態給視圖
             return Json(isLoggedIn);

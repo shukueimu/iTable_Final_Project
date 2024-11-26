@@ -21,7 +21,7 @@
 </div>
 
 <div class="container mt-4" style="margin-top:0px !important;">
-    <form asp-action="BookingPage" method="post" id="reservationForm">
+    <form asp-action="BookingPagePost" method="post" id="reservationForm">
         <!-- Top row for restaurant name, image, and booking options -->
         <div class="row">
             <!-- Left Column (Restaurant Name & Image) -->
@@ -123,7 +123,6 @@
                 <div id="selectedTimeDisplay"></div>
             </div> <!-- 結束 Right Column -->
         </div> <!-- 結束 row -->
-
         <!-- Bottom row for Booking Information -->
         <div class="row mt-4">
             <div class="col-12">
@@ -150,9 +149,9 @@
                         <label for="note">備註</label>
                     </div>
 
-@*                     <div class="form-floating mb-3">
-                        <input type="text" class="form-control" id="userID" name="UserID" placeholder="UserID">
-                        <label for="userID" >UserID(測試用)</label>
+                    @*                     <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="userID" name="UserID" placeholder="UserID">
+                    <label for="userID" >UserID(測試用)</label>
                     </div> *@
 
                     <!-- 隱藏欄位 -->
@@ -183,11 +182,11 @@
 </div> <!-- 結束 container -->
 
 <script>
-   // 假設 BusinessHoursStart 是從 ViewData 傳過來的，格式為 HH:mm（例如 09:00）
+    // 假設 BusinessHoursStart 是從 ViewData 傳過來的，格式為 HH:mm（例如 09:00）
     const businessHoursStart = "@ViewData["BusinessHoursStart"]";  // 這是從控制器傳過來的時間
     //轉換為Date時間型別
     const businessHoursStartDate = new Date(`1970-01-01T${businessHoursStart}:00`);
-    const lastCheckInTime="@ViewData["LastCheckInTime"]";
+    const lastCheckInTime = "@ViewData["LastCheckInTime"]";
     // 轉換為Date時間型別
     const lastCheckInTimeDate = new Date(`1970-01-01T${lastCheckInTime}:00`);
 
@@ -198,99 +197,99 @@
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
 
-window.onload = function () {
-    const reservationDateInput = document.getElementById("Date");
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    const todayDate = `${year}-${month}-${day}`;
+    window.onload = function () {
+        const reservationDateInput = document.getElementById("Date");
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const todayDate = `${year}-${month}-${day}`;
 
-    reservationDateInput.value = todayDate;
-    reservationDateInput.min = todayDate; // 設置最小選擇日期為今天
-    updateDropdownOptions();
-    document.getElementById("timeButtons").style.display = 'none';
+        reservationDateInput.value = todayDate;
+        reservationDateInput.min = todayDate; // 設置最小選擇日期為今天
+        updateDropdownOptions();
+        document.getElementById("timeButtons").style.display = 'none';
 
-    // 觸發時間選擇下拉選單的change事件
-    const timeSelect = document.getElementById("time");
-    updateButtons(); // 更新按鈕
-    timeSelect.dispatchEvent(new Event('change'));  // 手動觸發change事件
-};
+        // 觸發時間選擇下拉選單的change事件
+        const timeSelect = document.getElementById("time");
+        updateButtons(); // 更新按鈕
+        timeSelect.dispatchEvent(new Event('change'));  // 手動觸發change事件
+    };
 
-// 更新下拉選單中的時間選項
-function updateDropdownOptions() {
-    const reservationDateInput = document.getElementById("Date");
-    const timeSelect = document.getElementById("time");
-    const timeButtonsDiv = document.getElementById("timeButtons");
+    // 更新下拉選單中的時間選項
+    function updateDropdownOptions() {
+        const reservationDateInput = document.getElementById("Date");
+        const timeSelect = document.getElementById("time");
+        const timeButtonsDiv = document.getElementById("timeButtons");
 
-    const isToday = (reservationDateInput.value === `${year}-${month}-${day}`);
-    const currentTime = new Date(); // 當前時間
+        const isToday = (reservationDateInput.value === `${year}-${month}-${day}`);
+        const currentTime = new Date(); // 當前時間
 
-    // 清空下拉選單
-    timeSelect.innerHTML = "";
+        // 清空下拉選單
+        timeSelect.innerHTML = "";
 
-    // 重新生成選項，只顯示可用的時間
-    const times = [
-        "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00",
-        "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00",
-        "19:30", "20:00", "20:30", "21:00", "21:30", "22:00", "22:30", "23:00", "23:30", "00:00",
-        "00:30", "01:00", "01:30"
-    ];
+        // 重新生成選項，只顯示可用的時間
+        const times = [
+            "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00",
+            "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00",
+            "19:30", "20:00", "20:30", "21:00", "21:30", "22:00", "22:30", "23:00", "23:30", "00:00",
+            "00:30", "01:00", "01:30"
+        ];
 
-    let hasAvailableOptions = false;
+        let hasAvailableOptions = false;
 
-    for (const time of times) {
-        const optionTime = new Date(`${year}-${month}-${day}T${time}:00`);
+        for (const time of times) {
+            const optionTime = new Date(`${year}-${month}-${day}T${time}:00`);
 
-        // 如果是今天並且時間在當前時間之前，則跳過
-        if (isToday && optionTime < currentTime && !(time === "00:00" || time === "00:30" || time === "01:00" || time === "01:30")) {
-            continue;
-        }
+            // 如果是今天並且時間在當前時間之前，則跳過
+            if (isToday && optionTime < currentTime && !(time === "00:00" || time === "00:30" || time === "01:00" || time === "01:30")) {
+                continue;
+            }
 
-        // 新增有效選項，但要加上 BusinessHoursStart 的判斷條件
-        const businessStartTime = new Date(`${year}-${month}-${day}T${businessHoursStart}:00`);  // 將 BusinessHoursStart 轉為日期時間格式
+            // 新增有效選項，但要加上 BusinessHoursStart 的判斷條件
+            const businessStartTime = new Date(`${year}-${month}-${day}T${businessHoursStart}:00`);  // 將 BusinessHoursStart 轉為日期時間格式
 
-        if (optionTime < businessStartTime&& !(time === "00:00" || time === "00:30" || time === "01:00" || time === "01:30")) {
-         continue;  // 若時間小於 BusinessHoursStart，則跳過
-        }
+            if (optionTime < businessStartTime && !(time === "00:00" || time === "00:30" || time === "01:00" || time === "01:30")) {
+                continue;  // 若時間小於 BusinessHoursStart，則跳過
+            }
 
-        /////最後訂位時間判定 下拉選單
-        const lastCheckInTimeDate2 = new Date(`${year}-${month}-${day}T${lastCheckInTime}:00`);
+            /////最後訂位時間判定 下拉選單
+            const lastCheckInTimeDate2 = new Date(`${year}-${month}-${day}T${lastCheckInTime}:00`);
 
             // 檢查 lastCheckInTimeDate2 是否大於等於 02:00
-        if (lastCheckInTimeDate2 >= new Date(`${year}-${month}-${day}T02:00:00`)) {
-            // 如果 optionTime 大於 lastCheckInTimeDate2 或者 optionTime 是 00:00, 00:30, 01:00, 01:30 時
-            if (optionTime > lastCheckInTimeDate2 || ["00:00", "00:30", "01:00", "01:30"].includes(time)) {
-                continue;  // 隱藏該時間
+            if (lastCheckInTimeDate2 >= new Date(`${year}-${month}-${day}T02:00:00`)) {
+                // 如果 optionTime 大於 lastCheckInTimeDate2 或者 optionTime 是 00:00, 00:30, 01:00, 01:30 時
+                if (optionTime > lastCheckInTimeDate2 || ["00:00", "00:30", "01:00", "01:30"].includes(time)) {
+                    continue;  // 隱藏該時間
+                }
             }
+
+            // 檢查 lastCheckInTimeDate2 是否小於 02:00
+            if (lastCheckInTimeDate2 < new Date(`${year}-${month}-${day}T02:00:00`)) {
+                // 如果 optionTime 大於 lastCheckInTimeDate2 且小於 02:00
+                if (optionTime > lastCheckInTimeDate2 && optionTime < new Date(`${year}-${month}-${day}T02:00:00`)) {
+                    continue;  // 隱藏該時間
+                }
+            }
+
+
+
+            // 新增有效選項
+            const option = document.createElement("option");
+            option.value = time;
+            option.text = time;
+            timeSelect.appendChild(option);
+            hasAvailableOptions = true;
         }
 
-        // 檢查 lastCheckInTimeDate2 是否小於 02:00
-        if (lastCheckInTimeDate2 < new Date(`${year}-${month}-${day}T02:00:00`)) {
-            // 如果 optionTime 大於 lastCheckInTimeDate2 且小於 02:00
-            if (optionTime > lastCheckInTimeDate2 && optionTime < new Date(`${year}-${month}-${day}T02:00:00`)) {
-                continue;  // 隱藏該時間
-            }
+        // 無可用選項時顯示提示
+        if (!hasAvailableOptions) {
+            timeButtonsDiv.innerHTML = "<p>無可用時段</p>";
+        } else {
+            updateButtons();
         }
-
-
-
-        // 新增有效選項
-        const option = document.createElement("option");
-        option.value = time;
-        option.text = time;
-        timeSelect.appendChild(option);
-        hasAvailableOptions = true;
     }
-
-    // 無可用選項時顯示提示
-    if (!hasAvailableOptions) {
-        timeButtonsDiv.innerHTML = "<p>無可用時段</p>";
-    } else {
-        updateButtons();
-    }
-}
-//////
+    //////
     function updateButtons() {
         const timeSelect = document.getElementById("time");
         const selectedTime = timeSelect.value;
@@ -305,13 +304,13 @@ function updateDropdownOptions() {
 
         // 取得當前時間以做檢查
         const currentTime = new Date();
-            
+
         // 判斷是否為今天，來決定是否過濾過期的時間
         const isToday = (document.getElementById("Date").value === `${year}-${month}-${day}`);
 
         // 跨日的時間按鈕列表
         const crossDayTimes = ["00:00", "00:15", "00:30", "00:45", "01:00", "01:15", "01:30", "01:45", "02:00"];
-        
+
         // 生成按鈕的範圍，並過濾掉已過去的時段
         for (let i = -2; i <= 2; i++) {
             const buttonTime = new Date(baseTime.getTime() + i * 15 * 60 * 1000); // 增加或減少 15 分鐘
@@ -337,7 +336,7 @@ function updateDropdownOptions() {
 
 
             if (buttonTimeString < businessHoursStartString && !crossDayTimes.includes(buttonTimeString)) {
-                    continue;
+                continue;
             }
 
 
@@ -363,19 +362,19 @@ function updateDropdownOptions() {
                 const displayDateString = displayDate.toISOString().split('T')[0]; // 只取日期部分
                 const displayTimeString = buttonTimeString;
 
-                //新增隱藏欄位的資料        
-                document.getElementById("reservationTime").value = `${displayTimeString}`;  
-                
-                document.getElementById("reservationDate").value = `${displayDateString}` ;  // 將日期部分設置到 reservationDate 欄位
-               
-             //
+                //新增隱藏欄位的資料
+                document.getElementById("reservationTime").value = `${displayTimeString}`;
+
+                document.getElementById("reservationDate").value = `${displayDateString}`;  // 將日期部分設置到 reservationDate 欄位
+
+                //
                 selectedTimeDisplay.innerHTML = `已選擇時間: ${displayDateString} ${displayTimeString}`;
             };
 
             timeButtonsDiv.appendChild(button);
         }
     }
-//////
+    //////
 
     // 當日期或時間選擇變更時，重新更新時間選項
     document.getElementById("Date").addEventListener("change", function () {
@@ -439,47 +438,47 @@ function updateDropdownOptions() {
 
     //---------------
 
-        document.getElementById("reservationForm").addEventListener("submit", function (event) {
-            const reservationDate = document.getElementById("reservationDate").value;
-            const reservationTime = document.getElementById("reservationTime").value;
+    document.getElementById("reservationForm").addEventListener("submit", function (event) {
+        const reservationDate = document.getElementById("reservationDate").value;
+        const reservationTime = document.getElementById("reservationTime").value;
 
-            if (!reservationDate || !reservationTime) {
-                event.preventDefault(); // 阻止表單提交
-                alert("尚未選擇訂位時間");
-            }
+        if (!reservationDate || !reservationTime) {
+            event.preventDefault(); // 阻止表單提交
+            alert("尚未選擇訂位時間");
+        }
+    });
+
+    //CreateAt和UpdateAt設置-------------------------
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("reservationForm");
+        const createdAtField = document.getElementById("createdAt");
+        const updatedAtField = document.getElementById("updatedAt");
+
+        // 表單提交時觸發
+        form.addEventListener("submit", function () {
+            const now = new Date();
+            const formattedDate = formatDateTime(now);
+
+            // 更新隱藏欄位
+            createdAtField.value = formattedDate;
+            updatedAtField.value = formattedDate;
+
+            // Debug: 確認欄位值
+            console.log("CreatedAt:", createdAtField.value);
+            console.log("UpdatedAt:", updatedAtField.value);
         });
 
-        //CreateAt和UpdateAt設置-------------------------
-        document.addEventListener("DOMContentLoaded", function () {
-            const form = document.getElementById("reservationForm");
-            const createdAtField = document.getElementById("createdAt");
-            const updatedAtField = document.getElementById("updatedAt");
-
-            // 表單提交時觸發
-            form.addEventListener("submit", function () {
-                const now = new Date();
-                const formattedDate = formatDateTime(now);
-
-                // 更新隱藏欄位
-                createdAtField.value = formattedDate;
-                updatedAtField.value = formattedDate;
-
-                // Debug: 確認欄位值
-                console.log("CreatedAt:", createdAtField.value);
-                console.log("UpdatedAt:", updatedAtField.value);
-            });
-
-            // 格式化日期時間為 "YYYY-MM-DDTHH:mm:ss"，使用本地時間
-            function formatDateTime(date) {
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, "0");
-                const day = String(date.getDate()).padStart(2, "0");
-                const hours = String(date.getHours()).padStart(2, "0"); // 本地小時
-                const minutes = String(date.getMinutes()).padStart(2, "0");
-                const seconds = String(date.getSeconds()).padStart(2, "0");
-                return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-            }
-        });
+        // 格式化日期時間為 "YYYY-MM-DDTHH:mm:ss"，使用本地時間
+        function formatDateTime(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const day = String(date.getDate()).padStart(2, "0");
+            const hours = String(date.getHours()).padStart(2, "0"); // 本地小時
+            const minutes = String(date.getMinutes()).padStart(2, "0");
+            const seconds = String(date.getSeconds()).padStart(2, "0");
+            return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+        }
+    });
 
 
 </script>

@@ -95,13 +95,13 @@ namespace Big_Project_v3.Controllers
                 if (availability == null || availability.AvailableSeats == null)
                 {
                     ModelState.AddModelError("", "無法找到餐廳的座位資訊");
-                    return View(await GetBookingPageViewModel(reservation.RestaurantId));
+                    return View("BookingPage", await GetBookingPageViewModel(reservation.RestaurantId));
                 }
 
                 if (availability.AvailableSeats < totalGuests)
                 {
                     ModelState.AddModelError("", "超出目前可用座位數量，請重新選擇人數或時段");
-                    return View(await GetBookingPageViewModel(reservation.RestaurantId));
+                    return View("BookingPage", await GetBookingPageViewModel(reservation.RestaurantId));
                 }
 
                 availability.AvailableSeats -= totalGuests;
@@ -122,11 +122,14 @@ namespace Big_Project_v3.Controllers
                     { "BookerEmail", reservation.BookerEmail ?? "未提供Email" },
                     { "SpecialRequests", reservation.SpecialRequests ?? "無備註" }
                 });
+                Console.WriteLine($"TempData content: {TempData["ReservationDetails"]}");  // 確認 TempData 的內容
 
                 return RedirectToAction("BookingSuccess");
             }
 
-            return View(await GetBookingPageViewModel(reservation.RestaurantId));
+            //return View(await GetBookingPageViewModel(reservation.RestaurantId));
+            return View("BookingPage", await GetBookingPageViewModel(reservation.RestaurantId));
+
         }
 
         // 訂位成功頁面

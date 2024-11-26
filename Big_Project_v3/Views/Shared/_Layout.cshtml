@@ -190,7 +190,7 @@
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm">
             <!-- 商家管理在右上角並垂直對齊 -->
             <div class="top-bar py-1 d-flex justify-content-end align-items-center">
-                <a asp-controller="Backstage" asp-action="Home" class="me-3" style="font-weight: bold;">商家管理</a>
+                <a href="#" class="me-3" style="font-weight: bold;">商家管理</a>
             </div>
 
             <!-- Navbar 內容 -->
@@ -215,7 +215,6 @@
                 <div class="dropdown me-2" id="loggedIn" style="display: none;">
                     <button id="btnGroupDrop1" type="button" class="btn btn-outline-danger dropdown-toggle" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false" style="margin-right:6px">
                         <i class="bi bi-person-circle"></i> <!-- 圖示顯示為已登入狀態 -->
-                        <span>登入</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="btnGroupDrop1">
                         <li>
@@ -332,21 +331,30 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/restaurant.js" asp-append-version="true"></script>
     <script>
-        // 當頁面載入時，檢查用戶是否已登入
+       
         $(document).ready(function () {
-            $.get("/User/GetLoginStatus", function (isLoggedIn) {
-                if (isLoggedIn) {
-                    // 顯示已登入狀態的按鈕，隱藏未登入狀態的按鈕
+            $.get('@Url.Action("GetLoginStatus", "User")', function (isLoggedIn) {
+                console.log(isLoggedIn); // 顯示登入狀態
+                console.log(typeof isLoggedIn); // 顯示 isLoggedIn 的類型
+
+                // 確保將 isLoggedIn 轉換為布林值
+                isLoggedIn = JSON.parse(isLoggedIn);
+
+                // 使用嚴格比較
+                if (isLoggedIn === true) {
+                    console.log("顯示為已登入狀態");
                     $('#loggedIn').show();
                     $('#loggedOut').hide();
-                } else {
-                    // 顯示未登入狀態的按鈕，隱藏已登入狀態的按鈕
+                } else if (isLoggedIn === false) {
+                    console.log("顯示為未登入狀態");
                     $('#loggedOut').show();
                     $('#loggedIn').hide();
                 }
             });
         });
+
     </script>
+
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

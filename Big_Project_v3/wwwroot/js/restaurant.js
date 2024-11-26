@@ -122,4 +122,13 @@ document.querySelectorAll('.favorite').forEach(button => {
     });
 });
 
+//訂位
+document.getElementById('bookingLink').addEventListener('click', function (event) {
+    event.preventDefault();
+    // 阻止默認行為
+    // 跳轉到指定頁面，傳遞參數 
+    window.location.href = '@Url.Action("BookingPage", "Booking", new { RestaurantId = Model.Restaurant.RestaurantId })';
+});
+
+
 

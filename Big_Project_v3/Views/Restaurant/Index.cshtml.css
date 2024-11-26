@@ -26,7 +26,10 @@
 .restaurantNav {
     padding-top: 2px;
     padding-bottom: 2px;
+    height: 38px;
 }
+
+
 
 
 /*收藏*/
@@ -107,3 +110,17 @@ section {
     outline: none;
     box-shadow: none;
 }
+
+/*按鈕樣式*/
+.bookbtn {
+    font-weight: bold;
+    color: white;
+    background-color: #D25823;
+    outline: none;
+    border: hidden;
+}
+
+    /*按鈕觸碰*/
+    .bookbtn:hover {
+        background-color: #C53F0F
+    }

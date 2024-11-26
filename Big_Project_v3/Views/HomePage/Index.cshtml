@@ -1,4 +1,5 @@
-﻿@using Microsoft.AspNetCore.Html
+﻿@using Big_Project_v3.Models
+@using Microsoft.AspNetCore.Html
 @model HomePageViewModel
 @using System.Text.Json
 
@@ -198,7 +199,7 @@
 			<div class="card-body d-flex flex-column">
 				<!-- Top Content -->
 				<div class="review-top-section">
-					<h5 class="customer-name">@review.CustomerName</h5>
+					<h5 class="customer-name">@review.CustomerName.Substring(0, 1)＊@review.CustomerName.Substring(review.CustomerName.Length-1 , 1)</h5>
 					<!-- Rating and Date -->
 					<div class="review-score-date d-flex align-items-center mb-2">
 						<div class="review-score">
@@ -218,7 +219,7 @@
 				<hr />
 				<!-- Bottom Content -->
 				<div class="review-bottom-section"
-					 onclick="window.location.href='@Url.Action("Index", "Home", new { restaurantId = review.RestaurantID })'">
+					 onclick="window.location.href='/Restaurant/Index/' + @review.RestaurantID">
 					<div class="row">
 						<div class="col-sm-8">
 							<h6 class="restaurant-name mb-1">@review.RestaurantName</h6>
@@ -260,10 +261,10 @@
 					<span id="modalRestaurantRating"></span>
 				</div>
 				<p class="restaurant-address" id="modalRestaurantAddress"></p>
-				<img src="" id="modalImage" style="width:60%;height:auto;object-fit:cover;" />
+				<img src="" id="modalImage" style="width:60%;height:auto;object-fit:cover;max-height:350px" />
 
 				<!-- Add Hyperlink to Bottom Section -->
-				<a href="#" id="modalRestaurantLink" style="text-decoration: none; color: inherit; display: block; margin-top: 10px;">
+				<a href=`/Restaurant/Index/${review.RestaurantID}` id="modalRestaurantLink" style="text-decoration: none; color: inherit; display: block; margin-top: 10px;">
 					<div class="modal-link-content" style="border: 1px solid #ddd; padding: 10px; border-radius: 5px; text-align: center;">
 						立即查看餐廳詳情
 					</div>
@@ -305,7 +306,7 @@
 		document.getElementById('modalImage').src = review.ImageUrl || "default-image-path.jpg"; // Set a default image path
 
 		// Set the link for the restaurant
-		document.getElementById('modalRestaurantLink').href = `/Home/Index?restaurantId=${review.RestaurantID}`;
+		document.getElementById('modalRestaurantLink').href = `/Restaurant/Index/${review.RestaurantID}`;
 
 		// Show the modal
 		var reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
@@ -401,7 +402,7 @@
 	.card-img-top {
 		width: 100% !important;
 		border-radius: 15px 15px 0 0 !important;
-		object-fit: cover !important;
+		object-fit: fill !important;
 		min-height: 120px !important;
 		max-height: 120px !important;
 	}
@@ -522,187 +523,81 @@
 
 
 	// 動態渲染輪播內容
-	function renderCarousel() {
-		const carouselInner = document.getElementById("carouselInner");
-		const prevButton = document.querySelector("#carouselExampleControlsNoTouching .carousel-control-prev");
-		const nextButton = document.querySelector("#carouselExampleControlsNoTouching .carousel-control-next");
-		carouselInner.innerHTML = '';  // 清空内容
+	function renderCarouselCore(context, carouselId, restaurants, currentPage) {
+		const carouselInner = document.getElementById(carouselId);
+		const prevButton = document.querySelector(`#${carouselId} ~ .carousel-control-prev`);
+		const nextButton = document.querySelector(`#${carouselId} ~ .carousel-control-next`);
 
-		const totalPages = Math.ceil(restaurantList.length / itemsPerPage);
+		// 清空內容
+		carouselInner.innerHTML = '';
 
-		if (totalPages <= 1) {
-			prevButton.style.display = "none";
-			nextButton.style.display = "none";
+		// 檢查資料卡數量，小於或等於 itemsPerPage 時隱藏按鈕
+		if (restaurants.length <= itemsPerPage) {
+			if (prevButton) prevButton.style.display = 'none';
+			if (nextButton) nextButton.style.display = 'none';
 		} else {
-			prevButton.style.display = "block";
-			nextButton.style.display = "block";
+			if (prevButton) prevButton.style.display = 'block';
+			if (nextButton) nextButton.style.display = 'block';
 		}
 
-		// 每頁的內容按照 itemsPerPage 顯示
+		// 計算分頁
+		const totalPages = Math.ceil(restaurants.length / itemsPerPage);
 		const startIndex = currentPage * itemsPerPage;
-		const endIndex = Math.min(startIndex + itemsPerPage, restaurantList.length);
-		const pageItems = restaurantList.slice(startIndex, endIndex);
+		const endIndex = Math.min(startIndex + itemsPerPage, restaurants.length);
+		const pageItems = restaurants.slice(startIndex, endIndex);
 
 		let pageHtml = `<div class="carousel-item active"><div class="row justify-content-center">`;
 
-
+		// 渲染每個卡片
 		pageItems.forEach((restaurant, index) => {
+			const uniqueIndex = `${context}_${index}`;
 			pageHtml += `
-								<div class="col" style="flex: 0 0 ${100 / itemsPerPage}%; max-width: ${100 / itemsPerPage}%; height: 100%;">
-										<div class="card h-100" style="cursor: pointer;"  onclick="submitFormIfNoButton(event, 'hiddenForm_${index}')">
-										<img src="${restaurant.ImageUrl}" class="card-img-top" alt="${restaurant.RestaurantName}">
-										<div class="card-body">
-											<h5 class="card-title text-nowrap fw-bold overflow-hidden text-truncate">${restaurant.RestaurantName}</h5>
-											${getStarHtml(restaurant.RestaurantRating)}
-											<p style="margin-bottom:0 !important">${getPrice(restaurant.PriceRange)}．${getAdd(restaurant.RestaurantAddress)}</p>
-											<p>${restaurant.Description}</p>
-											<div class="time-buttons mt-2 d-flex justify-content-between" style="width: 100%;">
-													@* Hidden Form   *@
-												<form id="timeForm_${index}" method="POST" action="@Url.Action("Index", "Home")" style="display: none;">
-													<input type="hidden" name="time" id="selectedTime_${index}">
-													<input type="hidden" name="restaurantName" id="selectedRestaurant_${index}" value="${restaurant.RestaurantID}">
-												</form>
-												${generateTimeButtons(restaurant.RestaurantID, index)}
-											</div>
-										</div>
-									</div>
-								</div>
-								<form id="hiddenForm_${index}" method = "POST" action="/Restaurant/Index/${restaurant.RestaurantID}" style="display:none;" >
-									<input type="hidden" name="restaurantName" value="${restaurant.RestaurantID}">
-								</form>`;
+				<div class="col" style="flex: 0 0 ${100 / itemsPerPage}%; max-width: ${100 / itemsPerPage}%; height: 100%;">
+					<div class="card h-100" style="cursor: pointer;" onclick="submitFormIfNoButton(event, 'hiddenForm_${uniqueIndex}')">
+						<img src="${restaurant.ImageUrl}" class="card-img-top" alt="${restaurant.RestaurantName}">
+						<div class="card-body">
+							<h5 class="card-title text-nowrap fw-bold overflow-hidden text-truncate">${restaurant.RestaurantName}</h5>
+							${getStarHtml(restaurant.RestaurantRating)}
+							<p style="margin-bottom:0 !important">${getPrice(restaurant.PriceRange)}．${getAdd(restaurant.RestaurantAddress)}</p>
+							<p class="text-nowrap overflow-hidden fw-bold text-truncate">${restaurant.Description}</p>
+							<div class="time-buttons mt-2 d-flex justify-content-between" style="width: 100%;">
+								<form id="timeForm_${uniqueIndex}" method="GET" action="/Booking/BookingPage/${restaurant.RestaurantID}" style="display: none;">
+									<input type="hidden" name="time" id="selectedTime_${uniqueIndex}">
+									<input type="hidden" name="restaurantName" id="selectedRestaurant_${uniqueIndex}" value="${restaurant.RestaurantName}">
+								</form>
+								${generateTimeButtons(context, restaurant.RestaurantName, index)}
+							</div>
+						</div>
+					</div>
+				</div>
+				<form id="hiddenForm_${uniqueIndex}" method="POST" action="/Restaurant/Index/${restaurant.RestaurantID}" style="display:none;">
+					<input type="hidden" name="restaurantName" value="${restaurant.RestaurantID}">
+				</form>`;
 		});
 
 		pageHtml += `</div></div>`;
 		carouselInner.innerHTML = pageHtml;
 	}
 
+
 	function submitFormIfNoButton(event, formId) {
+		// 如果點擊的不是 .time-buttons 內的元素，則提交表單
 		if (!event.target.closest('.time-buttons')) {
 			document.getElementById(formId).submit();
 		}
 	}
-
-
-
 
 	function renderCarouselNearby() {
-		const carouselInnerNearby = document.getElementById("carouselInnerNearby");
-		const prevButton = document.querySelector("#carouselExampleControlsNearby .carousel-control-prev");
-		const nextButton = document.querySelector("#carouselExampleControlsNearby .carousel-control-next");
-		carouselInnerNearby.innerHTML = ''; // 清空內容
-
-		const totalPages = Math.ceil(nearbyRestaurants.length / itemsPerPage);
-
-		if (totalPages <= 1) {
-			prevButton.style.display = "none";
-			nextButton.style.display = "none";
-		} else {
-			prevButton.style.display = "block";
-			nextButton.style.display = "block";
-		}
-
-		const startIndex = currentPageNearby * itemsPerPage;
-		const endIndex = Math.min(startIndex + itemsPerPage, nearbyRestaurants.length);
-		const pageItems = nearbyRestaurants.slice(startIndex, endIndex);
-
-		let pageHtml = `<div class="carousel-item active"><div class="row justify-content-center">`;
-
-
-		pageItems.forEach((restaurant, index) => {
-			pageHtml += `
-						<div class="col" style="flex: 0 0 ${100 / itemsPerPage}%; max-width: ${100 / itemsPerPage}%; height: 100%;">
-							<div class="card h-100" style="cursor: pointer;" onclick="submitFormIfNoButtonNearby(event, 'hiddenFormNearby_${index}')">
-								<img src="${restaurant.ImageUrl}" class="card-img-top" alt="${restaurant.RestaurantName}">
-								<div class="card-body">
-									<h5 class="card-title text-nowrap fw-bold overflow-hidden text-truncate">${restaurant.RestaurantName}</h5>
-									${getStarHtml(restaurant.RestaurantRating)}
-									<p style="margin-bottom:0 !important">${getPrice(restaurant.PriceRange)}．${getAdd(restaurant.RestaurantAddress)}</p>
-									<p>${restaurant.Description}</p>
-									<div class="time-buttons mt-2 d-flex justify-content-between" style="width: 100%;">
-										<form id="timeFormNearby_${index}" method="POST" action="@Url.Action("Index", "Home")" style="display: none;">
-											<input type="hidden" name="time" id="selectedTimeNearby_${index}">
-											<input type="hidden" name="restaurantName" id="selectedRestaurantNearby_${index}" value="${restaurant.RestaurantName}">
-										</form>
-										${generateTimeButtons(restaurant.RestaurantID, index)}
-									</div>
-								</div>
-							</div>
-						</div>
-						<form id="hiddenFormNearby_${index}" method="POST" action="/Restaurant/Index/${restaurant.RestaurantID}" style="display:none;">
-							<input type="hidden" name="restaurantName" value="${restaurant.RestaurantID}">
-						</form>`;
-		});
-
-		pageHtml += `</div></div>`;
-		carouselInnerNearby.innerHTML = pageHtml;
-	}
-
-	function submitFormIfNoButtonNearby(event, formId) {
-		if (!event.target.closest('.time-buttons')) {
-			document.getElementById(formId).submit();
-		}
+		renderCarouselCore('nearby', 'carouselInnerNearby', nearbyRestaurants, currentPageNearby);
 	}
 
 	function renderCarouselActive() {
-		const carouselInnerActive = document.getElementById("carouselInnerActive");
-		const prevButton = document.querySelector("#carouselExampleControlsActive .carousel-control-prev");
-		const nextButton = document.querySelector("#carouselExampleControlsActive .carousel-control-next");
-		carouselInnerActive.innerHTML = ''; // 清空内容
-
-		const totalPages = Math.ceil(activeRestaurants.length / itemsPerPage);
-
-		if (totalPages <= 1) {
-			prevButton.style.display = "none";
-			nextButton.style.display = "none";
-		} else {
-			prevButton.style.display = "block";
-			nextButton.style.display = "block";
-		}
-
-		const startIndex = currentPageActive * itemsPerPage;
-		const endIndex = Math.min(startIndex + itemsPerPage, activeRestaurants.length);
-		const pageItems = activeRestaurants.slice(startIndex, endIndex);
-
-		let pageHtml = `<div class="carousel-item active"><div class="row justify-content-center">`;
-
-		pageItems.forEach((restaurant, index) => {
-			pageHtml += `
-						<div class="col" style="flex: 0 0 ${100 / itemsPerPage}%; max-width: ${100 / itemsPerPage}%; height: 100%;">
-							<div class="card h-100" style="cursor: pointer;" onclick="submitFormIfNoButtonActive(event, 'hiddenFormActive_${index}')">
-								<img src="${restaurant.ImageUrl}" class="card-img-top" alt="${restaurant.RestaurantName}">
-								<div class="card-body">
-									<h5 class="card-title text-nowrap fw-bold overflow-hidden text-truncate">${restaurant.RestaurantName}&nbsp;~${restaurant.Title}</h5>
-										${getStarHtml(restaurant.RestaurantRating)}
-									<p style="margin-bottom:0 !important">${getPrice(restaurant.PriceRange)}．${getAdd(restaurant.RestaurantAddress)}</p>
-									<p class="fw-semibold text-nowrap overflow-hidden text-truncate">${restaurant.Content}</p>
-									<div class="time-buttons mt-2 d-flex justify-content-between" style="width: 100%;">
-										<form id="timeFormActive_${index}" method="POST" action="@Url.Action("Index", "Home")" style="display: none;">
-											<input type="hidden" name="time" id="selectedTimeActive_${index}">
-											<input type="hidden" name="restaurantName" id="selectedRestaurantActive_${index}" value="${restaurant.RestaurantID}">
-										</form>
-										${generateTimeButtons(restaurant.RestaurantID, index)}
-									</div>
-								</div>
-							</div>
-						</div>
-						<form id="hiddenFormActive_${index}" method="POST" action="/Restaurant/Index/${restaurant.RestaurantID}" style="display:none;">
-							<input type="hidden" name="restaurantName" value="${restaurant.RestaurantID}">
-						</form>`;
-		});
-
-		pageHtml += `</div></div>`;
-		carouselInnerActive.innerHTML = pageHtml;
+		renderCarouselCore('active', 'carouselInnerActive', activeRestaurants, currentPageActive);
 	}
 
-
-	function submitFormIfNoButtonActive(event, formId) {
-		if (!event.target.closest('.time-buttons')) {
-			document.getElementById(formId).submit();
-		}
+	function renderCarousel() {
+		renderCarouselCore('general', 'carouselInner', restaurantList, currentPage);
 	}
-
-
-
 
 
 	//星星的函式
@@ -751,7 +646,7 @@
 
 
 	@* 產生時間按鈕 *@
-		function generateTimeButtons(restaurantName, index) {
+		function generateTimeButtons(context, restaurantName, index) {
 			const now = new Date();
 			const elevenTwentyPM = new Date();
 			elevenTwentyPM.setHours(23, 20, 0, 0);
@@ -761,7 +656,6 @@
 			if (now > elevenTwentyPM || now < tenThirtyAM) {
 				now.setHours(10, 30, 0, 0);
 			} else {
-
 				if (now.getMinutes() < 21) {
 					now.setMinutes(0, 0, 0);
 				} else if (now.getMinutes() >= 21 && now.getMinutes() < 50) {
@@ -770,7 +664,6 @@
 					now.setMinutes(60, 0, 0);
 				}
 			}
-
 
 			const formatTime = (date) => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 			const Time24Hour = (date) =>
@@ -783,21 +676,32 @@
 			const buttonStyle = 'background-color: #D25823; color: white; border: none; width: 32%; font-size: clamp(10px, 1vw, 12px); white-space: nowrap; height: 35px; border-radius: 5px; font-weight: bold;';
 
 			return `
-									<button type="button" class="time-button" style="${buttonStyle}" onclick="setTimeAndSubmit('${Time24Hour(leftTime)}', '${restaurantName}', ${index})">${formatTime(leftTime)}</button>
-									<button type="button" class="time-button" style="${buttonStyle}" onclick="setTimeAndSubmit('${Time24Hour(middleTime)}', '${restaurantName}', ${index})">${formatTime(middleTime)}</button>
-									<button type="button" class="time-button" style="${buttonStyle}" onclick="setTimeAndSubmit('${Time24Hour(rightTime)}', '${restaurantName}', ${index})">${formatTime(rightTime)}</button>
-								`;
+			<button type="button" class="time-button" style="${buttonStyle}"
+				onclick="setTimeAndSubmit('${context}', '${Time24Hour(leftTime)}', '${restaurantName}', ${index})">
+				${formatTime(leftTime)}
+			</button>
+			<button type="button" class="time-button" style="${buttonStyle}"
+				onclick="setTimeAndSubmit('${context}', '${Time24Hour(middleTime)}', '${restaurantName}', ${index})">
+				${formatTime(middleTime)}
+			</button>
+			<button type="button" class="time-button" style="${buttonStyle}"
+				onclick="setTimeAndSubmit('${context}', '${Time24Hour(rightTime)}', '${restaurantName}', ${index})">
+				${formatTime(rightTime)}
+			</button>
+		`;
 		}
 
 
 	@* 將所按的時間值傳出 *@
-		function setTimeAndSubmit(time, restaurantName, index) {
+		function setTimeAndSubmit(context, time, restaurantName, index) {
+			const uniqueIndex = `${context}_${index}`;
+			// 設置隱藏輸入的值
+			document.getElementById(`selectedTime_${uniqueIndex}`).value = time;
+			document.getElementById(`selectedRestaurant_${uniqueIndex}`).value = restaurantName;
 
-			document.getElementById(`selectedTime_${index}`).value = time; // 設置隱藏輸入的值
-			document.getElementById(`selectedRestaurant_${index}`).value = restaurantName;
-			document.getElementById(`timeForm_${index}`).submit(); // 提交到表單
+			// 提交表單
+			document.getElementById(`timeForm_${uniqueIndex}`).submit();
 		}
-
 
 	@*  // 切換頁面動態效果 *@
 		function scrollCarousel(direction) {
@@ -873,7 +777,7 @@
 
 
 	@* // 初始化和調整窗口大小重新渲染 *@
-		window.addEventListener("load", updateItemsPerPage);
+	window.addEventListener("load", updateItemsPerPage);
 	window.addEventListener("resize", updateItemsPerPage);
 
 	window.addEventListener("load", updateItemsPerPageNearby);
