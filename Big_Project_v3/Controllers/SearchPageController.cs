@@ -40,53 +40,39 @@ namespace Big_Project_v3.Controllers
             return View();
         }
 
-        [HttpGet] // 指定此方法只接受 POST 請求
-        //[Route("SearchPage/SearchRestaurants")]
-        public IActionResult SearchRestaurants(string keyword) // 定義搜尋餐廳的方法，接受關鍵字參數
+        [HttpGet]
+        public IActionResult SearchRestaurants(string keyword)
         {
-            // 從資料庫中獲取所有餐廳
-            var restaurants = _context.Restaurants.ToList();
+            var restaurants = _context.Restaurants
+                .Include(r => r.Photos) // 載入 Photos 關聯
+                .ToList();
 
-            // 使用迴圈檢查每間餐廳是否接受訂單
-            foreach (var restaurant in restaurants)
-            {
-                // 確保 IsReservationOpen 不為 NULL
-                Console.WriteLine($"餐廳: {restaurant.Name}, 是否接受訂單: {restaurant.IsReservationOpen}");
-            }
-
-            // 使用 Console.WriteLine 確認接收到的 keyword 是否正確
-            Console.WriteLine("搜尋關鍵字: " + keyword);
-
-            // 初始化查詢變數，將其設為 IQueryable，以便延遲查詢到資料庫層級
-            //IQueryable<Restaurant> query = _context.Restaurants;
-
-            // 若關鍵字為空白，直接查詢所有餐廳
             var results = string.IsNullOrWhiteSpace(keyword)
-                ? _context.Restaurants.ToList()
-                : _context.Restaurants
+                ? restaurants
+                : restaurants
                     .Where(r => r.Name.Contains(keyword) || r.Address.Contains(keyword) || r.Description.Contains(keyword))
                     .ToList();
 
-
-            //----------測試回傳數據----------
-            Console.WriteLine("搜尋結果數量: " + results.Count);
-            foreach (var restaurant in results)
-            {
-                Console.WriteLine("符合條件的餐廳名稱: " + restaurant.Name);
-            }
-            //----------測試回傳數據----------
-
-            // 建立 ViewModel，將篩選結果和關鍵字傳遞給部分檢視
             var viewModel = new SearchRestaurantViewModel
             {
-                Restaurants = results,   // 將搜尋結果賦值給 ViewModel 中的 Restaurants 屬性
-                SearchKeyword = keyword  // 將關鍵字賦值給 ViewModel 中的 SearchKeyword 屬性
-
+                Restaurants = results.Select(r => new RestaurantSearchResultViewModel
+                {
+                    Id = r.RestaurantId,
+                    Name = r.Name,
+                    AverageRating = r.AverageRating ?? 0,
+                    Address = r.Address,
+                    Description = r.Description,
+                    IsReservationOpen = r.IsReservationOpen,
+                    PhotoURL = r.Photos.FirstOrDefault()?.PhotoUrl // 獲取第一張照片的 URL
+                }),
+                SearchKeyword = keyword
             };
 
-            // 返回部分檢視 `_SearchRestaurant`，並傳遞 ViewModel
-            return PartialView("PartialView/_SearchRestaurant", viewModel); // 指定部分檢視路徑並提供資料
+            return PartialView("PartialView/_SearchRestaurant", viewModel);
         }
+
+
+
 
         public IActionResult GetAvailableTimes(DateTime selectedDate)
         {
@@ -141,20 +127,22 @@ namespace Big_Project_v3.Controllers
         [HttpPost]
         public IActionResult SortByRating([FromBody] SortRequest request)
         {
-            // 篩選條件：基於關鍵字和選中的地區
             var sortedRestaurants = _context.Restaurants
+                .Include(r => r.Photos) // 載入 Photos 關聯
                 .Where(r =>
                     (string.IsNullOrEmpty(request.Keyword) || r.Name.Contains(request.Keyword) || r.Address.Contains(request.Keyword)) &&
                     (request.SelectedDistricts == null || !request.SelectedDistricts.Any() || request.SelectedDistricts.Any(d => r.Address != null && r.Address.Contains(d))))
-                .OrderByDescending(r => r.AverageRating ?? 0) // 按評分排序
-                .Select(r => new SearchRestaurantViewModel
+                .OrderByDescending(r => r.AverageRating ?? 0)
+                .ToList() // 將查詢結果載入記憶體
+                .Select(r => new RestaurantSearchResultViewModel
                 {
                     Id = r.RestaurantId,
                     Name = r.Name,
                     AverageRating = r.AverageRating ?? 0,
                     Address = r.Address,
                     Description = r.Description,
-                    IsReservationOpen = r.IsReservationOpen // 加入 IsReservationOpen
+                    IsReservationOpen = r.IsReservationOpen,
+                    PhotoURL = r.Photos.FirstOrDefault()?.PhotoUrl // 獲取第一張照片的 URL
                 })
                 .ToList();
 
@@ -168,6 +156,8 @@ namespace Big_Project_v3.Controllers
             return PartialView("PartialView/_SearchRestaurantFolder/_SearchRestaurantSorting", sortedRestaurants);
         }
 
+
+
         // 定義請求的 DTO
         public class SortRequest
         {
@@ -176,62 +166,65 @@ namespace Big_Project_v3.Controllers
         }
 
 
-		[HttpPost]
-		public IActionResult FilterByDistrict([FromBody] List<string> selectedDistricts)
-		{
-			List<Restaurant> filteredRestaurants;
+        [HttpPost]
+        public IActionResult FilterByDistrict([FromBody] List<string> selectedDistricts)
+        {
+            List<Restaurant> filteredRestaurants;
 
-			if (selectedDistricts == null || !selectedDistricts.Any())
-			{
-				// 如果未選擇任何地區，返回所有餐廳
-				filteredRestaurants = _context.Restaurants.ToList();
-			}
-			else
-			{
-				// 篩選餐廳地址包含地區名稱的餐廳
-				filteredRestaurants = _context.Restaurants
-					.Where(r => selectedDistricts.Any(d => r.Address != null && r.Address.Contains(d))) // 篩選條件
-					.ToList();
-			}
+            if (selectedDistricts == null || !selectedDistricts.Any())
+            {
+                // 如果未選擇任何地區，返回所有餐廳
+                filteredRestaurants = _context.Restaurants
+                    .Include(r => r.Photos) // 載入 Photos 關聯
+                    .ToList();
+            }
+            else
+            {
+                // 篩選餐廳地址包含地區名稱的餐廳
+                filteredRestaurants = _context.Restaurants
+                    .Include(r => r.Photos) // 載入 Photos 關聯
+                    .Where(r => selectedDistricts.Any(d => r.Address != null && r.Address.Contains(d)))
+                    .ToList();
+            }
 
-			// 在後端 FilterByDistrict 中加入測試輸出
-			Console.WriteLine("返回的 JSON 資料: ");
-			foreach (var restaurant in filteredRestaurants)
-			{
-				Console.WriteLine($"Name: {restaurant.Name}, Address: {restaurant.Address}");
-			}
+            // 建立 ViewModel 並包含 PhotoURL
+            var viewModel = filteredRestaurants.Select(r => new LocationViewModel
+            {
+                Id = r.RestaurantId,
+                Name = r.Name,
+                Address = r.Address,
+                Description = r.Description,
+                AverageRating = r.AverageRating ?? 0,
+                Latitude = ExtractCoordinates(r.GoogleMapAddress).Latitude,
+                Longitude = ExtractCoordinates(r.GoogleMapAddress).Longitude,
+                IsReservationOpen = r.IsReservationOpen,
+                PhotoURL = r.Photos.FirstOrDefault()?.PhotoUrl // 獲取第一張照片的 URL
+            }).ToList();
 
-			// 測試輸出篩選結果
-			Console.WriteLine("符合篩選條件的餐廳數量: " + filteredRestaurants.Count);
-			foreach (var restaurant in filteredRestaurants)
-			{
-				Console.WriteLine($"餐廳名稱: {restaurant.Name}, 地址: {restaurant.Address}");
-			}
+            // 如果沒有符合條件的餐廳，返回提示
+            if (!viewModel.Any())
+            {
+                return PartialView("PartialView/_SearchRestaurantFolder/_SearchDistrictEmpty");
+            }
 
-			// 如果沒有符合條件的餐廳，返回提示
-			if (!filteredRestaurants.Any())
-			{
-				// 如果沒有匹配的結果，返回空部分視圖
-				return PartialView("PartialView/_SearchRestaurantFolder/_SearchDistrictEmpty");
-			}
-
-			// 返回篩選結果，渲染為部分視圖
-			return PartialView("PartialView/_SearchRestaurantFolder/_SearchDistrict", filteredRestaurants);
-		}
+            // 返回篩選結果，渲染為部分視圖
+            return PartialView("PartialView/_SearchRestaurantFolder/_SearchDistrict", viewModel);
+        }
 
 
-		[HttpPost]
+
+
+        [HttpPost]
         public IActionResult SortRestaurantsByLocation([FromBody] LocationViewModel userLocation)
         {
             double userLat = userLocation.Latitude;
             double userLng = userLocation.Longitude;
             bool sortByDistance = userLocation.SortByDistance;
 
-
-
-            // 查詢餐廳並按距離或名稱排序
+            // 查詢餐廳並載入 Photos
             var restaurants = _context.Restaurants
-                .AsEnumerable()
+                .Include(r => r.Photos) // 載入 Photos 關聯
+                .ToList()
                 .Select(r => new LocationViewModel
                 {
                     Id = r.RestaurantId,
@@ -241,8 +234,9 @@ namespace Big_Project_v3.Controllers
                     AverageRating = r.AverageRating ?? 0,
                     Latitude = ExtractCoordinates(r.GoogleMapAddress).Latitude,
                     Longitude = ExtractCoordinates(r.GoogleMapAddress).Longitude,
-					IsReservationOpen = r.IsReservationOpen // 設置此屬性
-				})
+                    IsReservationOpen = r.IsReservationOpen,
+                    PhotoURL = r.Photos.FirstOrDefault()?.PhotoUrl // 獲取第一張照片的 URL
+                })
                 .ToList();
 
             // 按距離或名稱排序
@@ -309,9 +303,10 @@ namespace Big_Project_v3.Controllers
         [HttpPost]
         public IActionResult FilterRestaurantsByPrice([FromBody] PriceFilterViewModel filter)
         {
-            // 根據價位條件篩選餐廳
+            // 根據價位條件篩選餐廳並載入 Photos
             var priceRange = filter.PriceRange;
             var restaurants = _context.Restaurants
+                .Include(r => r.Photos) // 載入 Photos 關聯
                 .AsEnumerable()
                 .Where(r =>
                 {
@@ -338,13 +333,12 @@ namespace Big_Project_v3.Controllers
                     AverageRating = r.AverageRating ?? 0,
                     Latitude = ExtractCoordinates(r.GoogleMapAddress).Latitude,
                     Longitude = ExtractCoordinates(r.GoogleMapAddress).Longitude,
-                    SearchKeyword = priceRange, // 儲存篩選條件
-                    IsReservationOpen = r.IsReservationOpen // 設置此屬性
+                    IsReservationOpen = r.IsReservationOpen,
+                    PhotoURL = r.Photos.FirstOrDefault()?.PhotoUrl // 獲取第一張照片的 URL
                 })
                 .ToList();
 
-            // 返回篩選結果的部分視圖
-            return PartialView("~/Views/Shared/PartialView/_SearchRestaurantFolder/_SearchMoney.cshtml", restaurants);
+            return PartialView("PartialView/_SearchRestaurantFolder/_SearchMoney", restaurants);
         }
 
     }

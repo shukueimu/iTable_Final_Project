@@ -1,12 +1,13 @@
 ﻿@model IEnumerable<Big_Project_v3.ViewModels.LocationViewModel>
 
-<div id="" class="bg-white p-3 rounded">
-        @foreach (var restaurant in Model)
-        {
-          <a href="@Url.Action("Index", "Restaurant", new { id = restaurant.Id })" class="text-decoration-none text-dark">
+<div class="bg-white p-3 rounded">
+    @foreach (var restaurant in Model)
+    {
+        <a href="@Url.Action("Index", "Restaurant", new { id = restaurant.Id })" class="text-decoration-none text-dark">
             <div class="restaurant-item d-flex mb-3">
-                <!-- 使用 Flexbox 讓內容水平排列 -->
-                <img src="~/img/輕井澤-封面.jpg" alt="Restaurant Image" class="img-thumbnail me-3" style="width: 200px; height: 200px;">
+                <!-- 使用動態 PhotoURL -->
+                <img src="@(restaurant.PhotoURL ?? Url.Content("~/img/輕井澤-封面.jpg"))" alt="Restaurant Image" class="img-thumbnail me-3" style="width: 200px; height: 200px;">
+
                 <div>
                     <h3 class="fw-bolder text-primary">@restaurant.Name</h3>
 
@@ -16,20 +17,13 @@
                         <h5 class="fw-bolder text-danger">此餐廳暫時無法接受訂單。</h5>
                     }
 
-                    <!-- 星級 Bootstrap 樣式 -->
-@*                     @await Html.PartialAsync("PartialView/_SearchRestaurantFolder/StarRating_BootStrap", restaurant.AverageRating)
-                    <p>@restaurant.Description</p>
-                    <br /> *@
-                    <!-- 星級 CSS 樣式 -->
                     @await Html.PartialAsync("PartialView/_SearchRestaurantFolder/StarRating_CSS", restaurant.AverageRating)
                     <br />
                     <p>@restaurant.Description</p>
                     <p>$$$ - @restaurant.Address</p>
-                    @* <p>距離: @restaurant.Distance.ToString("F2") 公里</p> *@
-                    @* <button class="btn btn-danger">下午7:00</button> *@
                 </div>
             </div>
             <hr />
-          </a>
-        }
+        </a>
+    }
 </div>

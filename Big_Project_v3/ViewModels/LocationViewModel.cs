@@ -13,6 +13,7 @@
         public string? Description { get; set; }
         public double Distance { get; set; } // 餐廳與使用者的距離
         public bool IsReservationOpen { get; set; }
+        public string? PhotoURL { get; set; } // 新增的屬性
 
     }
 
