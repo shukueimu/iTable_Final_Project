@@ -62,7 +62,13 @@
 
 
                 <div class="d-flex justify-content-between align-items-center">
-                    <button type="submit" class="btn btn-primary">儲存變更</button>
+                    <button type="submit" class="btn btn-primary"
+                            style="font-weight: bold; color: white; background-color: #D25823; border: none;"
+                            onmouseover="this.style.backgroundColor='#C53F0F'"
+                            onmouseout="this.style.backgroundColor='#D25823'">
+                        儲存變更
+                    </button>
+
                     <a href="javascript:void(0)" id="togglePasswordFields" class="text-decoration-underline text-primary">變更密碼</a>
                 </div>
 
@@ -81,7 +87,7 @@
 </div>
 
 <script>
-    document.querySelector("form").addEventListener("submit", function(event) {
+    document.querySelector("form").addEventListener("submit", function (event) {
         const passwordFields = document.getElementById("passwordFields");
         const passwordField = document.getElementById("newPassword");
         const confirmPasswordField = document.getElementById("confirmPassword");
@@ -108,7 +114,7 @@
     });
 
     // 切換密碼區塊顯示/隱藏
-    document.getElementById("togglePasswordFields").addEventListener("click", function() {
+    document.getElementById("togglePasswordFields").addEventListener("click", function () {
         const passwordFields = document.getElementById("passwordFields");
         passwordFields.classList.toggle("d-none");
 
@@ -118,3 +124,4 @@
         }
     });
 </script>
+

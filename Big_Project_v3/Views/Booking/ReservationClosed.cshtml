@@ -13,9 +13,13 @@
             <!-- 描述 -->
             <p class="fs-5 text-muted">目前餐廳未開放訂位，請稍後再試。</p>
             <!-- 按鈕 -->
-            <a href="@Url.Action("Index", "Restaurant")" class="btn btn-primary btn-lg mt-3">
+            <a href="@Url.Action("Index", "HomePage")" class="btn btn-lg mt-3"
+               style="background-color: #D25823; color: white; border: none;"
+               onmouseover="this.style.backgroundColor='#C53F0F'"
+               onmouseout="this.style.backgroundColor='#D25823'">
                 返回餐廳列表
             </a>
+
         </div>
     </div>
 </div>

@@ -35,5 +35,48 @@
             link.classList.add('active');
         }
     });
+
+    // -----------  新訂單通知  ---------------
+
+    // 追蹤視窗是否已顯示
+    let isModalShown = false;
+
+    // 每隔 60 秒查詢新訊息
+    setInterval(() => {
+        fetch('/Backstage/GetNewMessagesCount')
+            .then(response => response.json())
+            .then(data => {
+                if (data.count > 0 && !isModalShown) {
+                    // 更新訊息數量
+                    document.getElementById('newMessagesCount').textContent = data.count;
+
+                    // 獲取模態視窗元素
+                    const modalElement = document.getElementById('newMessagesModal');
+
+                    // 設定 Bootstrap 模態視窗選項
+                    const modal = new bootstrap.Modal(modalElement, {
+                        backdrop: 'static', // 禁止點擊背景關閉
+                        keyboard: false    // 禁止按下 Esc 鍵關閉
+                    });
+
+                    // 顯示視窗
+                    modal.show();
+
+                    // 設定視窗已顯示
+                    isModalShown = true;
+
+                    // 當視窗關閉時，重置狀態
+                    modalElement.addEventListener('hidden.bs.modal', () => {
+                        isModalShown = false;
+                    });
+
+                    // 設定視窗的 z-index，確保在最上層
+                    modalElement.style.zIndex = '1060';
+                }
+            })
+            .catch(error => console.error('Error fetching new messages:', error));
+    }, 60000); // 每 60 秒執行一次
+
+    // -----------  新訂單通知  ---------------
 });
 

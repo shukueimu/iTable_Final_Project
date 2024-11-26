@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Big_Project_v3-晟宇", "..
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "itable_1-庭毅1126", "..\小夥伴\itable_1-庭毅1126\itable_1\itable_1\itable_1-庭毅1126.csproj", "{AE863627-1D51-4B3E-BFF9-E2FBF19B93B3}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "demo_1-國廷1126", "..\小夥伴\demo_1_國廷1126\demo_1\demo_1-國廷1126.csproj", "{74527F37-EE9D-49F6-ABD5-8C4DFB1180B4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{AE863627-1D51-4B3E-BFF9-E2FBF19B93B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE863627-1D51-4B3E-BFF9-E2FBF19B93B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE863627-1D51-4B3E-BFF9-E2FBF19B93B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74527F37-EE9D-49F6-ABD5-8C4DFB1180B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74527F37-EE9D-49F6-ABD5-8C4DFB1180B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74527F37-EE9D-49F6-ABD5-8C4DFB1180B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74527F37-EE9D-49F6-ABD5-8C4DFB1180B4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

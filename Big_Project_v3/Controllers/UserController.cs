@@ -212,7 +212,7 @@ namespace Big_Project_v3.Controllers
                     HttpContext.Session.SetInt32("UserId", user.UserId);
 
                     // 重定向到訂位頁面（暫時的URL）
-                    return RedirectToAction("BookingPage", "Booking", new { restaurantID = 1 });
+                    return RedirectToAction("Index", "HomePage");
                 }
 
                 // 登入失敗，顯示錯誤訊息

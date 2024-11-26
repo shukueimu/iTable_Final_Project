@@ -34,6 +34,10 @@
                                 {
                                     <h5 class="text-success fw-bold">🎉 @reservation.ReservationStatus 訂位</h5>
                                 }
+                                else if (reservation.ReservationStatus == "未確認")
+                                {
+                                    <h5 class="text-success fw-bold">▲ @reservation.ReservationStatus 訂位</h5>
+                                }
                                 else
                                 {
                                     <h5 class="text-danger fw-bold">✘ @reservation.ReservationStatus 訂位</h5>

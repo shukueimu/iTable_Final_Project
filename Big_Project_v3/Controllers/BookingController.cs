@@ -23,6 +23,7 @@ namespace Big_Project_v3.Controllers
         [Route("BookingPage/{RestaurantId?}")]
         public async Task<IActionResult> BookingPage(int? RestaurantId)
         {
+
             if (!RestaurantId.HasValue)
             {
                 return NotFound(); // 如果 RestaurantId 是 null，返回 404
@@ -67,6 +68,12 @@ namespace Big_Project_v3.Controllers
                     ViewBag.ContactPhone = user.ContactPhone;
                     ViewBag.ContactEmail = user.ContactEmail;
                 }
+            }
+
+            if (!UserId.HasValue)
+            {
+                // 如果未登入，重定向到登入頁面
+                return RedirectToAction("Login", "User");
             }
 
             var photoUrl = await _context.Photos
