@@ -279,7 +279,7 @@
 
 
 
-<script>
+ <script>
 	function showReviewModal(review) {
 		// Log the review data for debugging
 		console.log("Review Data:", review);
@@ -288,7 +288,7 @@
 		const reviewScore = parseInt(review.ReviewScore) || 0;
 
 		// Populate modal with review data
-		document.getElementById('modalCustomerName').innerText = review.CustomerName || "Anonymous";
+		document.getElementById('modalCustomerName').innerText = review.CustomerName.substring(0, 1) + "＊" + review.CustomerName.substring(review.CustomerName.length - 1,);
 		document.getElementById('modalReviewScore').innerHTML =
 			Array(reviewScore).fill('<i class="fa fa-star text-warning"></i>').join('') +
 			Array(5 - reviewScore).fill('<i class="fa fa-star text-muted"></i>').join('');

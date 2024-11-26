@@ -139,11 +139,18 @@
                 })
                 .then(html => {
                     document.getElementById('mainContent').innerHTML = html;
+
+                    // 初始化新載入內容中的星級評分
+                    const starRatingContainers = document.querySelectorAll('#mainContent .star-rating');
+                    starRatingContainers.forEach(container => {
+                        initializeStarRating(container);
+                    });
                 })
                 .catch(error => {
                     console.error('Error loading partial view:', error);
                 });
-        }
+        };
+
 
         // 3. 定義收藏相關功能
         window.removeFavorite = function (RestaurantID) {
@@ -232,7 +239,7 @@
             }
 
             const reviewIdInput = form.querySelector('input[name="ReviewID"]');
-            const isEdit = reviewIdInput !== null;
+            const isEdit = reviewIdInput !== null && reviewIdInput.value !== "";
 
             const formData = {
                 Rating: parseFloat(selectedRating.value),
@@ -250,27 +257,33 @@
             }
 
             const url = isEdit ? '/Member/EditComment' : '/Member/SubmitComment';
-            const type = 'POST';
 
-            $.ajax({
-                url: url,
-                type: type,
-                contentType: 'application/json',
-                data: JSON.stringify(formData),
-                success: function (response) {
-                    if (response.success) {
+            axios.post(url, formData)
+                .then(response => {
+                    const data = response.data;
+                    if (data.success) {
                         $('#addCommentModal').modal('hide');
-                        loadPartialView('_Comment'); // 重新加載評論部分視圖
-                        alert(response.message); // 顯示成功訊息
+                        // loadPartialView('_Comment'); // 重新加載評論部分視圖
+                        alert(data.message); // 顯示成功訊息
+                        location.reload('_Comment'); // 重新載入頁面
                     } else {
-                        alert(response.message); // 顯示失敗訊息
+                        alert(data.message); // 顯示失敗訊息
+                        location.reload('_Comment'); // 重新載入頁面
                     }
-                },
-                error: function () {
+                })
+                .catch(error => {
+                    console.error('Error submitting comment:', error);
                     alert('評論提交失敗，請稍後再試。');
-                }
-            });
+                });
         };
+
+        // 示例的 initializeStarRating 函數
+        function initializeStarRating(container) {
+            // 此函數根據需要進行初始化，可能不需要任何操作
+            // 目前的星星評分系統已經通過 CSS 處理懸停和選中狀態
+        }
+
+
 
         // 7. 刪除評論的函數
         window.deleteComment = function (ReviewID) {
