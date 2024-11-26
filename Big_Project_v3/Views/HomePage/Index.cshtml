@@ -2,7 +2,10 @@
 @model HomePageViewModel
 @using System.Text.Json
 
-<body>
+
+
+
+
 <div class="container-fluid mt-0 col-11">
 	<!-- 使內容在頁面中央對齊並自適應寬度
 		 mt-4: Bootstrap 的上方外距，數字 4 表示 1.5rem（大約24px）的間距 -->
@@ -11,16 +14,18 @@
 		<!-- mb-4: 設置底部外距 -->
 		<div class="col-12">
 			<form method="get" action="/HomePage/Index" id="districtForm">
-				<input type="hidden" name="district" id="districtInput" value="西屯區">
+				<input type="hidden" name="district" id="districtInput" value="南屯區">
 			</form>
 			@Html.Partial("PartialView/_SearchBar", Model.SearchModel)
 			<!-- 搜尋列放置於頁面頂部 -->
+
+
 		</div>
 	</div>
 </div>
 
 
- <script>
+<script>
 	document.addEventListener("DOMContentLoaded", function () {
 		const searchButton = document.getElementById("searchButton");
 
@@ -273,7 +278,7 @@
 
 
 
- <script>
+<script>
 	function showReviewModal(review) {
 		// Log the review data for debugging
 		console.log("Review Data:", review);
@@ -344,7 +349,7 @@
 
 
 @* 餐廳資料卡的樣式----------------------------- *@
- <style>
+<style>
 
 	.carousel-wrapper {
 		width: 90% !important;
@@ -443,7 +448,7 @@
 
 
 
- <script>
+<script>
 	// 使用絕對路徑的餐廳數據
 
 	const restaurantList = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(restaurantListWithAbsolutePaths));
@@ -543,28 +548,28 @@
 
 		pageItems.forEach((restaurant, index) => {
 			pageHtml += `
-							<div class="col" style="flex: 0 0 ${100 / itemsPerPage}%; max-width: ${100 / itemsPerPage}%; height: 100%;">
-									<div class="card h-100" style="cursor: pointer;"  onclick="submitFormIfNoButton(event, 'hiddenForm_${index}')">
-									<img src="${restaurant.ImageUrl}" class="card-img-top" alt="${restaurant.RestaurantName}">
-									<div class="card-body">
-										<h5 class="card-title text-nowrap fw-bold overflow-hidden text-truncate">${restaurant.RestaurantName}</h5>
-										${getStarHtml(restaurant.RestaurantRating)}
-										<p style="margin-bottom:0 !important">${getPrice(restaurant.PriceRange)}．${getAdd(restaurant.RestaurantAddress)}</p>
-										<p>${restaurant.Description}</p>
-										<div class="time-buttons mt-2 d-flex justify-content-between" style="width: 100%;">
-												@* Hidden Form   *@
-											<form id="timeForm_${index}" method="POST" action="@Url.Action("Index", "Home")" style="display: none;">
-												<input type="hidden" name="time" id="selectedTime_${index}">
-												<input type="hidden" name="restaurantName" id="selectedRestaurant_${index}" value="${restaurant.RestaurantID}">
-											</form>
-											${generateTimeButtons(restaurant.RestaurantID, index)}
+								<div class="col" style="flex: 0 0 ${100 / itemsPerPage}%; max-width: ${100 / itemsPerPage}%; height: 100%;">
+										<div class="card h-100" style="cursor: pointer;"  onclick="submitFormIfNoButton(event, 'hiddenForm_${index}')">
+										<img src="${restaurant.ImageUrl}" class="card-img-top" alt="${restaurant.RestaurantName}">
+										<div class="card-body">
+											<h5 class="card-title text-nowrap fw-bold overflow-hidden text-truncate">${restaurant.RestaurantName}</h5>
+											${getStarHtml(restaurant.RestaurantRating)}
+											<p style="margin-bottom:0 !important">${getPrice(restaurant.PriceRange)}．${getAdd(restaurant.RestaurantAddress)}</p>
+											<p>${restaurant.Description}</p>
+											<div class="time-buttons mt-2 d-flex justify-content-between" style="width: 100%;">
+													@* Hidden Form   *@
+												<form id="timeForm_${index}" method="POST" action="@Url.Action("Index", "Home")" style="display: none;">
+													<input type="hidden" name="time" id="selectedTime_${index}">
+													<input type="hidden" name="restaurantName" id="selectedRestaurant_${index}" value="${restaurant.RestaurantID}">
+												</form>
+												${generateTimeButtons(restaurant.RestaurantID, index)}
+											</div>
 										</div>
 									</div>
 								</div>
-							</div>
-								<form id="hiddenForm_${index}" method = "POST" action="/Home?restaurantId=${restaurant.RestaurantID}" style="display:none;" >
-								<input type="hidden" name="restaurantName" value="${restaurant.RestaurantID}">
-							</form>`;
+								<form id="hiddenForm_${index}" method = "POST" action="/Restaurant/Index/${restaurant.RestaurantID}" style="display:none;" >
+									<input type="hidden" name="restaurantName" value="${restaurant.RestaurantID}">
+								</form>`;
 		});
 
 		pageHtml += `</div></div>`;
@@ -605,27 +610,27 @@
 
 		pageItems.forEach((restaurant, index) => {
 			pageHtml += `
-					<div class="col" style="flex: 0 0 ${100 / itemsPerPage}%; max-width: ${100 / itemsPerPage}%; height: 100%;">
-						<div class="card h-100" style="cursor: pointer;" onclick="submitFormIfNoButtonNearby(event, 'hiddenFormNearby_${index}')">
-							<img src="${restaurant.ImageUrl}" class="card-img-top" alt="${restaurant.RestaurantName}">
-							<div class="card-body">
-								<h5 class="card-title text-nowrap fw-bold overflow-hidden text-truncate">${restaurant.RestaurantName}</h5>
-								${getStarHtml(restaurant.RestaurantRating)}
-								<p style="margin-bottom:0 !important">${getPrice(restaurant.PriceRange)}．${getAdd(restaurant.RestaurantAddress)}</p>
-								<p>${restaurant.Description}</p>
-								<div class="time-buttons mt-2 d-flex justify-content-between" style="width: 100%;">
-									<form id="timeFormNearby_${index}" method="POST" action="@Url.Action("Index", "Home")" style="display: none;">
-										<input type="hidden" name="time" id="selectedTimeNearby_${index}">
-										<input type="hidden" name="restaurantName" id="selectedRestaurantNearby_${index}" value="${restaurant.RestaurantName}">
-									</form>
-									${generateTimeButtons(restaurant.RestaurantID, index)}
+						<div class="col" style="flex: 0 0 ${100 / itemsPerPage}%; max-width: ${100 / itemsPerPage}%; height: 100%;">
+							<div class="card h-100" style="cursor: pointer;" onclick="submitFormIfNoButtonNearby(event, 'hiddenFormNearby_${index}')">
+								<img src="${restaurant.ImageUrl}" class="card-img-top" alt="${restaurant.RestaurantName}">
+								<div class="card-body">
+									<h5 class="card-title text-nowrap fw-bold overflow-hidden text-truncate">${restaurant.RestaurantName}</h5>
+									${getStarHtml(restaurant.RestaurantRating)}
+									<p style="margin-bottom:0 !important">${getPrice(restaurant.PriceRange)}．${getAdd(restaurant.RestaurantAddress)}</p>
+									<p>${restaurant.Description}</p>
+									<div class="time-buttons mt-2 d-flex justify-content-between" style="width: 100%;">
+										<form id="timeFormNearby_${index}" method="POST" action="@Url.Action("Index", "Home")" style="display: none;">
+											<input type="hidden" name="time" id="selectedTimeNearby_${index}">
+											<input type="hidden" name="restaurantName" id="selectedRestaurantNearby_${index}" value="${restaurant.RestaurantName}">
+										</form>
+										${generateTimeButtons(restaurant.RestaurantID, index)}
+									</div>
 								</div>
 							</div>
 						</div>
-					</div>
-					<form id="hiddenFormNearby_${index}" method="POST" action="/Home?restaurantId=${restaurant.RestaurantID}" style="display:none;">
-						<input type="hidden" name="restaurantName" value="${restaurant.RestaurantID}">
-					</form>`;
+						<form id="hiddenFormNearby_${index}" method="POST" action="/Restaurant/Index/${restaurant.RestaurantID}" style="display:none;">
+							<input type="hidden" name="restaurantName" value="${restaurant.RestaurantID}">
+						</form>`;
 		});
 
 		pageHtml += `</div></div>`;
@@ -662,27 +667,27 @@
 
 		pageItems.forEach((restaurant, index) => {
 			pageHtml += `
-					<div class="col" style="flex: 0 0 ${100 / itemsPerPage}%; max-width: ${100 / itemsPerPage}%; height: 100%;">
-						<div class="card h-100" style="cursor: pointer;" onclick="submitFormIfNoButtonActive(event, 'hiddenFormActive_${index}')">
-							<img src="${restaurant.ImageUrl}" class="card-img-top" alt="${restaurant.RestaurantName}">
-							<div class="card-body">
-								<h5 class="card-title text-nowrap fw-bold overflow-hidden text-truncate">${restaurant.RestaurantName}&nbsp;~${restaurant.Title}</h5>
-									${getStarHtml(restaurant.RestaurantRating)}
-								<p style="margin-bottom:0 !important">${getPrice(restaurant.PriceRange)}．${getAdd(restaurant.RestaurantAddress)}</p>
-								<p class="fw-semibold text-nowrap overflow-hidden text-truncate">${restaurant.Content}</p>
-								<div class="time-buttons mt-2 d-flex justify-content-between" style="width: 100%;">
-									<form id="timeFormActive_${index}" method="POST" action="@Url.Action("Index", "Home")" style="display: none;">
-										<input type="hidden" name="time" id="selectedTimeActive_${index}">
-										<input type="hidden" name="restaurantName" id="selectedRestaurantActive_${index}" value="${restaurant.RestaurantID}">
-									</form>
-									${generateTimeButtons(restaurant.RestaurantID, index)}
+						<div class="col" style="flex: 0 0 ${100 / itemsPerPage}%; max-width: ${100 / itemsPerPage}%; height: 100%;">
+							<div class="card h-100" style="cursor: pointer;" onclick="submitFormIfNoButtonActive(event, 'hiddenFormActive_${index}')">
+								<img src="${restaurant.ImageUrl}" class="card-img-top" alt="${restaurant.RestaurantName}">
+								<div class="card-body">
+									<h5 class="card-title text-nowrap fw-bold overflow-hidden text-truncate">${restaurant.RestaurantName}&nbsp;~${restaurant.Title}</h5>
+										${getStarHtml(restaurant.RestaurantRating)}
+									<p style="margin-bottom:0 !important">${getPrice(restaurant.PriceRange)}．${getAdd(restaurant.RestaurantAddress)}</p>
+									<p class="fw-semibold text-nowrap overflow-hidden text-truncate">${restaurant.Content}</p>
+									<div class="time-buttons mt-2 d-flex justify-content-between" style="width: 100%;">
+										<form id="timeFormActive_${index}" method="POST" action="@Url.Action("Index", "Home")" style="display: none;">
+											<input type="hidden" name="time" id="selectedTimeActive_${index}">
+											<input type="hidden" name="restaurantName" id="selectedRestaurantActive_${index}" value="${restaurant.RestaurantID}">
+										</form>
+										${generateTimeButtons(restaurant.RestaurantID, index)}
+									</div>
 								</div>
 							</div>
 						</div>
-					</div>
-					<form id="hiddenFormActive_${index}" method="POST" action="/Home?restaurantId=${restaurant.RestaurantID}" style="display:none;">
-						<input type="hidden" name="restaurantName" value="${restaurant.RestaurantID}">
-					</form>`;
+						<form id="hiddenFormActive_${index}" method="POST" action="/Restaurant/Index/${restaurant.RestaurantID}" style="display:none;">
+							<input type="hidden" name="restaurantName" value="${restaurant.RestaurantID}">
+						</form>`;
 		});
 
 		pageHtml += `</div></div>`;
@@ -778,10 +783,10 @@
 			const buttonStyle = 'background-color: #D25823; color: white; border: none; width: 32%; font-size: clamp(10px, 1vw, 12px); white-space: nowrap; height: 35px; border-radius: 5px; font-weight: bold;';
 
 			return `
-								<button type="button" class="time-button" style="${buttonStyle}" onclick="setTimeAndSubmit('${Time24Hour(leftTime)}', '${restaurantName}', ${index})">${formatTime(leftTime)}</button>
-								<button type="button" class="time-button" style="${buttonStyle}" onclick="setTimeAndSubmit('${Time24Hour(middleTime)}', '${restaurantName}', ${index})">${formatTime(middleTime)}</button>
-								<button type="button" class="time-button" style="${buttonStyle}" onclick="setTimeAndSubmit('${Time24Hour(rightTime)}', '${restaurantName}', ${index})">${formatTime(rightTime)}</button>
-							`;
+									<button type="button" class="time-button" style="${buttonStyle}" onclick="setTimeAndSubmit('${Time24Hour(leftTime)}', '${restaurantName}', ${index})">${formatTime(leftTime)}</button>
+									<button type="button" class="time-button" style="${buttonStyle}" onclick="setTimeAndSubmit('${Time24Hour(middleTime)}', '${restaurantName}', ${index})">${formatTime(middleTime)}</button>
+									<button type="button" class="time-button" style="${buttonStyle}" onclick="setTimeAndSubmit('${Time24Hour(rightTime)}', '${restaurantName}', ${index})">${formatTime(rightTime)}</button>
+								`;
 		}
 
 
@@ -876,5 +881,4 @@
 
 	window.addEventListener("load", updateItemsPerPageActive);
 	window.addEventListener("resize", updateItemsPerPageActive);
-	</script>
-</body>
+</script>

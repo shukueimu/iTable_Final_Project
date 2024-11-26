@@ -7,27 +7,27 @@
         <div class="restaurant-item d-flex mb-3">
             <!-- d-flex: 使用 Flexbox 讓內容水平排列
                  mb-3: 設定底部外距為 3（相當於 1rem） -->
-            <img src="~/img/輕井澤-封面.jpg" alt="Restaurant Image" class="img-thumbnail me-3" style="width: 120px; height: 80px;">
+            <img src="~/img/輕井澤-封面.jpg" alt="Restaurant Image" class="img-thumbnail me-3" style="width: 200px; height: 200px;">
             <!-- img-thumbnail: 添加圖片縮略圖邊框樣式
                  me-3: 設定右側外距為 3（相當於 1rem）
                  style: 手動設定圖片寬度和高度 -->
 
             <div>
-                <h6 class="text-primary">@restaurant.Name</h6>
+                <h3 class="fw-bolder text-primary">@restaurant.Name</h3>
 
                         <!-- 判斷餐廳是否接受訂單 -->
                         @if (!restaurant.IsReservationOpen)
                         {
-                            <p class="text-danger">此餐廳暫時無法接受訂單。</p>
+                            <h5 class="fw-bolder text-danger">此餐廳暫時無法接受訂單。</h5>
                         }
 
                 <!-- text-primary: 設定文字顏色為主要顏色 -->
-                @await Html.PartialAsync("PartialView/_SearchRestaurantFolder/StarRating_BootStrap", restaurant.AverageRating)
+@*                 @await Html.PartialAsync("PartialView/_SearchRestaurantFolder/StarRating_BootStrap", restaurant.AverageRating)
                 @restaurant.Description
-                <br />
+                <br /> *@
                 @await Html.PartialAsync("PartialView/_SearchRestaurantFolder/StarRating_CSS", restaurant.AverageRating)
                 <br />
-                @restaurant.Description
+                        <p>@restaurant.Description</p>
 
                 <p>$$$ - @restaurant.Address</p>
                 @* <button class="btn btn-danger">下午7:00</button> *@
