@@ -10,7 +10,14 @@
             </li>
             <li>
                 <span>評論者: </span>
-                @(review.User != null ? review.User.Name : "未知用戶")
+                @{
+                    var userName = review.User != null ? review.User.Name : "未知用戶";
+                    if (userName.Length > 1)
+                    {
+                        userName = userName.Substring(0, 1) + "＊" + userName.Substring(2);
+                    }
+                }
+                @userName
             </li>
             <li class="rating d-flex align-items-center">
                 <div>
