@@ -64,32 +64,52 @@
                     fill: true // 填滿區域
                 }]
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: true
-                    }
-                },
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: ''
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: '訂單數量'
-                        },
-                        ticks: {
-                            stepSize: 1, // 設定步進為 1，確保顯示整數
-                        }
-                    }
-                }
-            }
+			options: {
+				responsive: true,
+				plugins: {
+					legend: {
+						display: true,
+						position: 'top',
+						labels: {
+							font: {
+								size: 26 // 設定圖例文字大小為 26px
+							}
+						}
+					},
+					tooltip: {
+						enabled: true
+					}
+				},
+				scales: {
+					x: {
+						title: {
+							display: true,
+							text: '日期',
+							font: {
+								size: 26
+							}
+						},
+						ticks: {
+							font: {
+								size: 26
+							}
+						}
+					},
+					y: {
+						beginAtZero: true,
+						title: {
+							display: true,
+							text: ''
+						},
+						ticks: {
+							stepSize: 1, // 設定步進為 1，確保顯示整數
+							font: {
+								size: 26 // 設定文字大小為 26px
+							}
+						}
+					}
+				}
+			}
         });
     });
 </script>
