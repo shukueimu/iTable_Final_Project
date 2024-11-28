@@ -18,7 +18,10 @@
                             <h5 class="fw-bolder text-danger">此餐廳暫時無法接受訂單。</h5>
                         }
 
+                        <div>
                         @await Html.PartialAsync("PartialView/_SearchRestaurantFolder/StarRating_CSS", restaurant.AverageRating)
+                        <span>@restaurant.AverageRating</span>
+                        </div>
                         <br />
                         <p>@restaurant.Description</p>
                         <p>@restaurant.Address</p>
