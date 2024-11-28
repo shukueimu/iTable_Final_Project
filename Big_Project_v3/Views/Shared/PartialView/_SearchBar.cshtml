@@ -106,7 +106,6 @@
                 </form>
                 @* 搜尋按鈕的方法與邏輯 *@
                 <script>
-
                     // 將代碼包裹在一個命名空間，避免全局作用域污染
                     const SearchApp = {
                         searchRestaurants: function () {
@@ -311,10 +310,10 @@
                 <div class="row align-items-center m-3">
                     <!-- 左側按鈕區域 -->
                     <div id="restaurant-item" class="col-auto">
-                        <button class="btn btn-outline-primary me-2" onclick="sortByRating()">評分高低</button>
+                        <button class="fw-bold btn-lg btn btn-outline-primary me-2" onclick="sortByRating()">評分高低</button>
 
                         @* <button class="btn btn-outline-primary" onclick="sortByDistance()">距離遠近</button> *@
-                        <button id="sortByDistanceButton" class="btn btn-outline-primary">距離遠近</button>
+                        <button id="sortByDistanceButton" class="fw-bold btn-lg btn btn-outline-primary">距離遠近</button>
                     </div>
                     <script>
                         function sortByRating() {
@@ -355,7 +354,7 @@
                     <!-- 中間的地點提示文字 -->
                     <div class="col-9 text-center">
                         <!--col 影響它的位置-->
-                        <p class="mb-0">
+                        <p class="fw-bold fs-5 mb-0">
                             您現在的地點在台中市嗎？
                             <a href="#" id="getLocation" class="text-danger">
                                 <i class="bi bi-geo-alt-fill"></i> 獲得現在地點
@@ -439,14 +438,21 @@
 
                                         // 更新畫面內容
                                         if (district) {
+                                            // 使用 Bootstrap 的 alert-success 類別顯示成功訊息
+                                            locationSection.className = "";
                                             locationSection.innerHTML = `您目前的位置為：台中市${district}`;
 
+                                            // 存儲位置信息到 localStorage
                                             localStorage.setItem("locationDescription", locationSection.innerHTML);
+
+                                            // 更新隱藏的輸入欄位並提交表單
                                             districtInput.value = district;
                                             districtForm.submit();
-
                                         } else {
+                                            // 使用 Bootstrap 的 alert-danger 類別顯示錯誤訊息
+                                            locationSection.className = "";
                                             locationSection.innerHTML = "您的位置不在台中市範圍內。";
+
                                             districtForm.submit();
                                         }
 

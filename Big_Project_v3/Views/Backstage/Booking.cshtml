@@ -45,75 +45,69 @@
 
 @* ----------------------表單--------------------- *@
 
-<div>
-	<table class="table table-bordered table-hover text-center align-middle">
-		<thead>
-			<tr>
+<div class="container-fluid my-4" id="mainContainer">
 
-				<th>@Html.DisplayNameFor(model => model.ReservationId)</th> <!-- ReservationID -->
-				<th>@Html.DisplayNameFor(model => model.BookerName)</th> <!-- 姓名 -->
-				<th>@Html.DisplayNameFor(model => model.BookerPhone)</th> <!-- 電話 -->
-				<td>@Html.DisplayNameFor(model => model.BookerEmail)</td>
-				<th>@Html.DisplayNameFor(model => model.NumAdults)</th> <!-- 大人 -->
-				<th>@Html.DisplayNameFor(model => model.NumChildren)</th> <!-- 小孩 -->
-				<th>@Html.DisplayNameFor(model => model.ReservationDate)</th> <!-- 預約日期 -->
-				<th>@Html.DisplayNameFor(model => model.ReservationTime)</th> <!-- 預約時間 -->
-				<th>@Html.DisplayNameFor(model => model.CreatedAt)</th> <!-- 下單時間 -->
-				<th>@Html.DisplayNameFor(model => model.SpecialRequests)</th> <!-- 備註 -->
-				<th>@Html.DisplayNameFor(model => model.ReservationStatus)</th> <!-- 狀態 -->
-				<th>編輯</th>
+	<!-- 使用 70vh 讓高度也變得動態 -->
+	<div class="card-body d-flex align-items-center justify-content-center" style="height: 100%;">
+		<!-- 這裡是大格子的內容區域 -->
+		<div id="contentArea" class="w-100 h-100 border border-secondary d-flex align-items-center justify-content-center" style="border: 1px dashed #aaa;">
+			<div class="table-responsive">
+				<table class="table table-bordered table-hover text-center align-middle">
+					<thead>
+						<tr>
+							@* class="fs-5" *@
+							<th>@Html.DisplayNameFor(model => model.ReservationId)</th>
+							<th style=" min-width: 100px;">@Html.DisplayNameFor(model => model.BookerName)</th>
+							<th style="min-width: 150px;">@Html.DisplayNameFor(model => model.BookerPhone)</th>
+							<td style="min-width: 200px;">@Html.DisplayNameFor(model => model.BookerEmail)</td>
+							<th>@Html.DisplayNameFor(model => model.NumAdults)</th>
+							<th>@Html.DisplayNameFor(model => model.NumChildren)</th>
+							<th style="min-width: 150px;">@Html.DisplayNameFor(model => model.ReservationDate)</th>
+							<th style="min-width: 100px;">@Html.DisplayNameFor(model => model.ReservationTime)</th>
+							<th style="min-width: 100px;">@Html.DisplayNameFor(model => model.CreatedAt)</th>
+							<th style="min-width: 200px;">@Html.DisplayNameFor(model => model.SpecialRequests)</th>
+							<th style="min-width: 120px;">@Html.DisplayNameFor(model => model.ReservationStatus)</th>
+							<th style="min-width: 100px;">編輯</th>
+						</tr>
 
-				@* <th>ReservationID</th>
-				<th>姓名</th>
-				<th>電話</th>
-				<th>大人</th>
-				<th>小孩</th>
-				<th>預約日期</th>
-				<th>預約時間</th>
-				<th>下單時間</th>
-				<th>備註</th>
-				<th>狀態</th>
-				<th>編輯</th> *@
-			</tr>
+					</thead>
 
-		</thead>
+					<tbody>
 
-		<tbody>
+						@foreach (var item in Model)
+						{
+							<tr id="row-@item.ReservationId">
+								<td class="no-edit">@Html.DisplayFor(modelItem => item.ReservationId)</td>
+								<input type="hidden" name="ReservationId" value="@item.ReservationId" />
+								<input type="hidden" name="RestaurantId" value="@item.RestaurantId" />
+								<input type="hidden" name="UserId" value="@item.UserId" />
+								<input type="hidden" name="UpdatedAt" value="@item.UpdatedAt" />
 
-			@foreach (var item in Model)
-			{
-				<tr id="row-@item.ReservationId">
-					<td class="no-edit">@Html.DisplayFor(modelItem => item.ReservationId)</td>
-					<input type="hidden" name="ReservationId" value="@item.ReservationId" />
-					<input type="hidden" name="RestaurantId" value="@item.RestaurantId" />
-					<input type="hidden" name="UserId" value="@item.UserId" />
-					<input type="hidden" name="UpdatedAt" value="@item.UpdatedAt" />
+								<td class="fs-5" data-name="BookerName">@Html.DisplayFor(modelItem => item.BookerName)</td>
+								<td data-name="BookerPhone">@Html.DisplayFor(modelItem => item.BookerPhone)</td>
+								<td data-name="BookerEmail">@Html.DisplayFor(modelItem => item.BookerEmail)</td>
+								<td data-name="NumAdults">@Html.DisplayFor(modelItem => item.NumAdults)</td>
+								<td data-name="NumChildren">@Html.DisplayFor(modelItem => item.NumChildren)</td>
 
-					<td data-name="BookerName">@Html.DisplayFor(modelItem => item.BookerName)</td>
-					<td data-name="BookerPhone">@Html.DisplayFor(modelItem => item.BookerPhone)</td>
-					<td data-name="BookerEmail">@Html.DisplayFor(modelItem => item.BookerEmail)</td>
-					<td data-name="NumAdults">@Html.DisplayFor(modelItem => item.NumAdults)</td>
-					<td data-name="NumChildren">@Html.DisplayFor(modelItem => item.NumChildren)</td>
-					@* <td>@Html.DisplayFor(modelItem => item.ReservationDate)</td>
-				<td>@Html.DisplayFor(modelItem => item.ReservationTime)</td> *@
-					<td data-name="ReservationDate">@Html.DisplayFor(modelItem => item.ReservationDate)</td>
-					<td data-name="ReservationTime">@item.ReservationTime?.ToString("HH:mm")</td>
-					@* <td data-name="ReservationTime">@Html.DisplayFor(modelItem => item.ReservationTime)</td> *@@* 12小時制bug *@
+								<td data-name="ReservationDate">@Html.DisplayFor(modelItem => item.ReservationDate)</td>
+								<td data-name="ReservationTime">@item.ReservationTime?.ToString("HH:mm")</td>
 
-					<td class="no-edit">@Html.DisplayFor(modelItem => item.CreatedAt)</td>
-					<td data-name="SpecialRequests">@Html.DisplayFor(modelItem => item.SpecialRequests)</td>
-					<td class="status-cell" data-name="ReservationStatus">@Html.DisplayFor(modelItem => item.ReservationStatus)</td>
+								<td class="no-edit">@Html.DisplayFor(modelItem => item.CreatedAt)</td>
+								<td data-name="SpecialRequests">@Html.DisplayFor(modelItem => item.SpecialRequests)</td>
+								<td class="status-cell" data-name="ReservationStatus">@Html.DisplayFor(modelItem => item.ReservationStatus)</td>
 
-					<td>
-						<a href="javascript:void(0);" class="btn btn-primary edit-button" data-row-id="@item.ReservationId">Edit</a>
-					</td>
-				</tr>
-			}
+								<td>
+									<a href="javascript:void(0);" class="btn btn-primary edit-button" data-row-id="@item.ReservationId">Edit</a>
+								</td>
+							</tr>
+						}
 
 
-		</tbody>
-	</table>
-
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
 </div>
 @* ---------------------------------modal------------------------------------ *@
 

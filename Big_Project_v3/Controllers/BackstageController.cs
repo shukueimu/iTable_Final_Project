@@ -128,8 +128,8 @@ namespace Big_Project_v3.Controllers
             return View(data);
 		}
 
-		public IActionResult Restaurant(string? action)
-		{
+        public IActionResult Restaurant(string? action)
+        {
             string LogIn_managerPosition = HttpContext.Session.GetString("ManagerPosition")!.ToString();
             if (LogIn_managerPosition == "財務")
             {
@@ -245,7 +245,6 @@ namespace Big_Project_v3.Controllers
 
         public IActionResult RestaurantPhoto()
         {
-
             // 從 Session 中獲取 RestaurantId
             var restaurantIdString = HttpContext.Session.GetString("RestaurantId");
             if (string.IsNullOrEmpty(restaurantIdString) || !int.TryParse(restaurantIdString, out int restaurantId))
@@ -254,7 +253,163 @@ namespace Big_Project_v3.Controllers
                 return RedirectToAction("LogIn", "Backstage"); // 導回登入頁面
             }
 
-            return View();
+            // 從資料庫中查詢屬於這個餐廳的所有圖片
+            var photos = _context.Photos.Where(p => p.RestaurantId == restaurantId).ToList();
+
+            if (photos == null || photos.Count == 0)
+            {
+                Console.WriteLine("沒有找到對應的圖片資料");
+            }
+
+            // 將圖片資料作為模型傳遞給 View
+            return View(photos);
+        }
+
+        // -----------------------Restaurant的圖片新view上傳------------------------------
+        public class PhotoUpdateRequest
+        {
+            public List<Photo> UpdatedPhotos { get; set; } = new List<Photo>();
+            public List<Photo> NewPhotos { get; set; } = new List<Photo>();
+            public List<int> DeletedPhotoIds { get; set; } = new List<int>();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdatePhoto([FromBody] List<Photo> photos)
+        {
+            // 確認傳入的圖片資料是否為空
+            if (photos == null || photos.Count == 0)
+            {
+                Console.WriteLine("photos 為 null 或空");
+                return BadRequest("無法解析圖片數據");
+            }
+
+            // 從 Session 中獲取 RestaurantId，確保只有登入的使用者可以修改資料
+            var restaurantIdString = HttpContext.Session.GetString("RestaurantId");
+            if (string.IsNullOrEmpty(restaurantIdString) || !int.TryParse(restaurantIdString, out int restaurantId))
+            {
+                Console.WriteLine("RestaurantId 無法取得或轉換失敗");
+                return RedirectToAction("LogIn", "Backstage");
+            }
+
+            try
+            {
+                // 遍歷每個傳入的圖片資料，並進行更新
+                foreach (var photo in photos)
+                {
+                    var existingPhoto = await _context.Photos
+                        .FirstOrDefaultAsync(p => p.PhotoId == photo.PhotoId && p.RestaurantId == restaurantId);
+
+                    if (existingPhoto == null)
+                    {
+                        Console.WriteLine($"未找到對應的圖片: PhotoId = {photo.PhotoId}");
+                        return NotFound($"未找到對應的圖片: PhotoId = {photo.PhotoId}");
+                    }
+
+                    // 更新圖片的屬性
+                    existingPhoto.PhotoUrl = photo.PhotoUrl;
+                    existingPhoto.PhotoType = photo.PhotoType;
+                    existingPhoto.Description = photo.Description;
+                    existingPhoto.UploadedAt = DateTime.UtcNow.AddHours(8); // 更新為當前時間
+                }
+
+                // 保存變更
+                await _context.SaveChangesAsync();
+                Console.WriteLine("圖片資料更新成功");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"更新圖片資料時發生錯誤: {ex.Message}");
+                return StatusCode(500, "更新圖片資料時發生錯誤");
+            }
+
+            return Ok("圖片資料更新成功");
+        }
+
+        // -----------------------Restaurant的圖片新view新增------------------------------
+        [HttpPost]
+        public async Task<IActionResult> AddPhoto([FromBody] Photo photo)
+        {
+            if (photo == null)
+            {
+                Console.WriteLine("photo 為 null");
+                return BadRequest("無法解析圖片數據");
+            }
+
+            // 從 Session 中獲取 RestaurantId，確保只有登入的使用者可以修改資料
+            var restaurantIdString = HttpContext.Session.GetString("RestaurantId");
+            if (string.IsNullOrEmpty(restaurantIdString) || !int.TryParse(restaurantIdString, out int restaurantId))
+            {
+                Console.WriteLine("RestaurantId 無法取得或轉換失敗");
+                return RedirectToAction("LogIn", "Backstage");
+            }
+
+            try
+            {
+                // 設定餐廳 ID
+                photo.RestaurantId = restaurantId;
+                photo.UploadedAt = DateTime.UtcNow.AddHours(8);
+
+                // 將新圖片添加到資料庫
+                _context.Photos.Add(photo);
+                await _context.SaveChangesAsync();
+                Console.WriteLine("圖片新增成功");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"新增圖片時發生錯誤: {ex.Message}");
+                return StatusCode(500, "新增圖片時發生錯誤");
+            }
+
+            return Ok("圖片新增成功");
+        }
+
+        // -----------------------Restaurant的圖片新view刪除------------------------------
+
+        [HttpPost]
+        public async Task<IActionResult> DeletePhotos([FromBody] List<int> photoIds)
+        {
+            // 確認傳入的圖片ID列表是否為空
+            if (photoIds == null || photoIds.Count == 0)
+            {
+                Console.WriteLine("photoIds 為 null 或空");
+                return BadRequest("無法解析圖片ID數據");
+            }
+
+            // 從 Session 中獲取 RestaurantId，確保只有登入的使用者可以修改資料
+            var restaurantIdString = HttpContext.Session.GetString("RestaurantId");
+            if (string.IsNullOrEmpty(restaurantIdString) || !int.TryParse(restaurantIdString, out int restaurantId))
+            {
+                Console.WriteLine("RestaurantId 無法取得或轉換失敗");
+                return RedirectToAction("LogIn", "Backstage");
+            }
+
+            try
+            {
+                // 查找並刪除對應的圖片
+                var photosToDelete = await _context.Photos
+                    .Where(p => photoIds.Contains(p.PhotoId) && p.RestaurantId == restaurantId)
+                    .ToListAsync();
+
+                if (photosToDelete == null || photosToDelete.Count == 0)
+                {
+                    Console.WriteLine("未找到對應的圖片資料");
+                    return NotFound("未找到對應的圖片資料");
+                }
+
+                // 移除找到的圖片
+                _context.Photos.RemoveRange(photosToDelete);
+
+                // 保存變更
+                await _context.SaveChangesAsync();
+                Console.WriteLine("圖片資料刪除成功");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"刪除圖片資料時發生錯誤: {ex.Message}");
+                return StatusCode(500, "刪除圖片資料時發生錯誤");
+            }
+
+            return Ok("圖片資料刪除成功");
         }
 
         //-----------------------Restaurant的餐廳資訊partial------------------------------
@@ -387,6 +542,7 @@ namespace Big_Project_v3.Controllers
             // 只取得屬於這個餐廳的訂單
             var reservations = _context.Reservations
                 .Where(r => r.RestaurantId == restaurantId)
+                .OrderByDescending(r => r.ReservationId) // 這裡倒序排列
                 .ToList();
 
             // 將訂單資料傳遞給視圖

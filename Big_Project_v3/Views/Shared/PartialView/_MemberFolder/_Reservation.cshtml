@@ -28,7 +28,7 @@
 
                                 @if (reservation.ReservationStatus == "已確認")
                                 {
-                                    <h5 class="text-success fw-bold">✔ @reservation.ReservationStatus 訂位</h5>
+                                    <h5 class="text-primary fw-bold">✔ @reservation.ReservationStatus 訂位</h5>
                                 }
                                 else if (reservation.ReservationStatus == "已完成")
                                 {
@@ -36,7 +36,7 @@
                                 }
                                 else if (reservation.ReservationStatus == "未確認")
                                 {
-                                    <h5 class="text-success fw-bold">▲ @reservation.ReservationStatus 訂位</h5>
+                                    <h5 class="text-info fw-bold">▲ @reservation.ReservationStatus 訂位</h5>
                                 }
                                 else
                                 {
