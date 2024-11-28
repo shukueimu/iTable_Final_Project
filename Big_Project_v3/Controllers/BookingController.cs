@@ -18,7 +18,7 @@ namespace Big_Project_v3.Controllers
             _context = context;
         }
 
-        // GET 方法: 用於載入訂位頁面
+        // GET 方法: 用於載入訂位頁面//
         [HttpGet]
         [Route("BookingPage/{RestaurantId?}")]
         public async Task<IActionResult> BookingPage(int? RestaurantId)
