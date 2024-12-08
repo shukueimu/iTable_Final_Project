@@ -111,45 +111,7 @@ namespace Big_Project_v3.Controllers
         {
             return View();
         }
-
-        // POST: User/Edit/5
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Edit(int id, [Bind("UserId,UserName,Name,ContactPhone,ContactEmail,CreatedAt,UpdatedAt")] User user)
-        //{
-        //    if (id != user.UserId)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    if (ModelState.IsValid)
-        //    {
-        //        try
-        //        {
-        //            // 更新 UpdatedAt 時間
-        //            user.UpdatedAt = DateTime.Now;
-
-        //            // 更新使用者資料
-        //            _context.Update(user);
-        //            await _context.SaveChangesAsync();
-        //        }
-        //        catch (DbUpdateConcurrencyException)
-        //        {
-        //            if (!UserExists(user.UserId))
-        //            {
-        //                return NotFound();
-        //            }
-        //            else
-        //            {
-        //                throw;
-        //            }
-        //        }
-        //        // 更新成功後返回到會員資料頁面或其他頁面
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    return View(user);
-        //}
-
+        
         // GET: User/Delete/5---------------------------------------------
         public async Task<IActionResult> Delete(int? id)
         {
