@@ -234,7 +234,22 @@
 								<div>
 									<i class="bi bi-p-circle"></i>
 									<span>
-										是否附有停車場:@Model.Restaurant.HasParking
+										是否附有停車場:
+										@if (Model.Restaurant.HasParking.HasValue)
+										{
+											@if (Model.Restaurant.HasParking.Value)
+											{
+												<text>有</text>
+											}
+											else
+											{
+												<text>無</text>
+											}
+										}
+										else
+										{
+											<text>未知</text>
+										}
 									</span>
 								</div>
 							</li>
